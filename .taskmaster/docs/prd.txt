@@ -1,0 +1,1 @@
+请你按照 nextjs 的最佳实践解耦 @page.tsx
