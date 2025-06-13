@@ -15,35 +15,45 @@ export const revalidate = 300; // 5分钟 / 5 minutes
 // Server-side function to fetch release information
 async function getLatestRelease(): Promise<ProcessedRelease | null> {
   try {
-    console.log("Starting release data fetch...");
+    // 在构建时直接请求 GitHub API，运行时使用我们的 API 路由
+    // During build time, fetch directly from GitHub API; at runtime, use our API route
+    const isBuilding =
+      typeof window === "undefined" &&
+      !process.env.VERCEL_URL &&
+      !process.env.VERCEL;
 
-    // 检测运行环境
-    // Detect runtime environment
-    const isVercel = !!process.env.VERCEL;
-    const isBuilding = typeof window === "undefined" && !isVercel;
-
-    console.log(`Environment: isVercel=${isVercel}, isBuilding=${isBuilding}`);
-
-    // 在所有环境下都直接调用 GitHub API，避免自引用问题
-    // Always call GitHub API directly to avoid self-reference issues
-    const { getLatestReleaseFromGitHub } = await import("../lib/github-api");
-    const releaseData = await getLatestReleaseFromGitHub();
-
-    if (releaseData) {
-      console.log(`Successfully fetched release data: ${releaseData.version}`);
+    if (isBuilding) {
+      // 构建时直接请求 GitHub API
+      // During build, fetch directly from GitHub API
+      const { getLatestReleaseFromGitHub } = await import("../lib/github-api");
+      return await getLatestReleaseFromGitHub();
     } else {
-      console.error("Failed to fetch release data - returned null");
-    }
+      // 运行时使用我们的 API 路由
+      // At runtime, use our API route
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NODE_ENV === "development"
+          ? "http://localhost:3000"
+          : "https://echolab-www.vercel.app";
 
-    return releaseData;
-  } catch (error) {
-    console.error("Error in getLatestRelease:", error);
-    // 提供更详细的错误信息
-    // Provide more detailed error information
-    if (error instanceof Error) {
-      console.error("Error details:", error.message);
-      console.error("Error stack:", error.stack);
+      const response = await fetch(`${baseUrl}/api/releases/latest`, {
+        // 在服务器端缓存 5 分钟
+        next: { revalidate: 300 },
+      });
+
+      if (!response.ok) {
+        console.error(
+          "Failed to fetch release data from API:",
+          response.statusText
+        );
+        return null;
+      }
+
+      const releaseData = await response.json();
+      return releaseData;
     }
+  } catch (error) {
+    console.error("Error fetching release data:", error);
     return null;
   }
 }

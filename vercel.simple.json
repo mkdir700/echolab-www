@@ -1,27 +1,7 @@
 {
   "version": 2,
   "name": "echolab-www",
-  "framework": "nextjs",
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "functions": {
-    "app/api/releases/latest/route.ts": {
-      "maxDuration": 30
-    }
-  },
-  "env": {
-    "GITHUB_OWNER": "mkdir700",
-    "GITHUB_REPO": "echolab"
-  },
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=300, stale-while-revalidate=600"
-        }
-      ]
-    }
-  ]
+  "outputDirectory": "out",
+  "framework": "nextjs"
 }
