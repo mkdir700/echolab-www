@@ -22,6 +22,8 @@ async function getLatestRelease(): Promise<ProcessedRelease | null> {
       !process.env.VERCEL_URL &&
       !process.env.VERCEL;
 
+    console.log("isBuilding:", isBuilding);
+
     if (isBuilding) {
       // 构建时直接请求 GitHub API
       // During build, fetch directly from GitHub API
@@ -40,6 +42,8 @@ async function getLatestRelease(): Promise<ProcessedRelease | null> {
         // 在服务器端缓存 5 分钟
         next: { revalidate: 300 },
       });
+
+      console.log("API Response:", response);
 
       if (!response.ok) {
         console.error(
