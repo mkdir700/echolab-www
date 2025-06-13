@@ -4,53 +4,6 @@ import { Play, Github } from "lucide-react";
 import { SimpleThemeToggle } from "@/components/ThemeToggle";
 
 export default function Header() {
-  // 平滑滚动到指定锚点的函数，带有缓动动画
-  // Smooth scroll to specified anchor function with easing animation
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const headerHeight = 80; // Header的高度，用于偏移 / Header height for offset
-      const elementPosition = element.offsetTop - headerHeight;
-      const startPosition = window.pageYOffset;
-      const distance = elementPosition - startPosition;
-      const duration = 800; // 动画持续时间 / Animation duration
-      let start: number | null = null;
-
-      // 缓动函数 - easeInOutCubic / Easing function - easeInOutCubic
-      const easeInOutCubic = (t: number): number => {
-        return t < 0.5
-          ? 4 * t * t * t
-          : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-      };
-
-      // 动画函数 / Animation function
-      const animateScroll = (timestamp: number) => {
-        if (start === null) start = timestamp;
-        const progress = timestamp - start;
-        const progressPercentage = Math.min(progress / duration, 1);
-        const easedProgress = easeInOutCubic(progressPercentage);
-
-        window.scrollTo(0, startPosition + distance * easedProgress);
-
-        if (progress < duration) {
-          requestAnimationFrame(animateScroll);
-        }
-      };
-
-      requestAnimationFrame(animateScroll);
-    }
-  };
-
-  // 处理锚点点击事件
-  // Handle anchor click events
-  const handleAnchorClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    sectionId: string
-  ) => {
-    e.preventDefault();
-    scrollToSection(sectionId);
-  };
-
   // 处理Logo点击回到顶部
   // Handle logo click to scroll to top
   const handleLogoClick = () => {
@@ -88,7 +41,11 @@ export default function Header() {
           <nav className="hidden md:flex items-center space-x-2">
             <a
               href="#features"
-              onClick={(e) => handleAnchorClick(e, "features")}
+              onClick={() =>
+                document
+                  .getElementById("features")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="group relative px-4 py-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-300 font-medium cursor-pointer backdrop-blur-xl border border-transparent hover:border-border/50"
             >
               功能
@@ -96,7 +53,11 @@ export default function Header() {
             </a>
             <a
               href="#download"
-              onClick={(e) => handleAnchorClick(e, "download")}
+              onClick={() =>
+                document
+                  .getElementById("download")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="group relative px-4 py-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-300 font-medium cursor-pointer backdrop-blur-xl border border-transparent hover:border-border/50"
             >
               下载
@@ -104,7 +65,11 @@ export default function Header() {
             </a>
             <a
               href="#support"
-              onClick={(e) => handleAnchorClick(e, "support")}
+              onClick={() =>
+                document
+                  .getElementById("support")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="group relative px-4 py-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-300 font-medium cursor-pointer backdrop-blur-xl border border-transparent hover:border-border/50"
             >
               支持
