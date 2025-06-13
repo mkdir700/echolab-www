@@ -15,15 +15,32 @@ const nextConfig: NextConfig = {
   // 禁用服务端功能 / Disable server-side features
   trailingSlash: true,
 
+  // Vercel 部署优化 / Vercel deployment optimization
+  distDir: '.next',
+
+  // 基础路径配置（如果需要子路径部署）/ Base path configuration (if subdirectory deployment needed)
+  // basePath: '',
+  // assetPrefix: '',
+
   env: {
     // Custom environment variables can be added here
   },
 
-  // 暂时禁用实验性功能以避免构建问题
-  // Temporarily disable experimental features to avoid build issues
-  // experimental: {
-  //   optimizeCss: true,
-  // },
+  // 实验性功能 / Experimental features
+  experimental: {
+    // 启用优化的 CSS / Enable optimized CSS
+    optimizeCss: false, // 暂时禁用以避免构建问题 / Temporarily disable to avoid build issues
+  },
+
+  // 编译器选项 / Compiler options
+  compiler: {
+    // 移除 console.log（生产环境）/ Remove console.log (production)
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // 性能优化 / Performance optimization
+  poweredByHeader: false,
+  reactStrictMode: true,
 };
 
 export default nextConfig;

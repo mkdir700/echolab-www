@@ -10,7 +10,12 @@
     "serve": "npx serve out",
     "lint": "next lint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "vercel:dev": "vercel dev",
+    "vercel:build": "vercel build",
+    "vercel:deploy": "vercel --prod",
+    "vercel:preview": "vercel",
+    "deploy": "npm run build && vercel --prod"
   },
   "dependencies": {
     "@radix-ui/react-separator": "^1.1.7",
