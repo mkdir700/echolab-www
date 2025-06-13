@@ -413,16 +413,11 @@ export default function DownloadSection() {
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            移动设备访问提示 / Mobile Device Notice
+            暂不支持移动设备
           </h3>
           <p className="text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
             EchoLab
             是专为桌面端设计的专业语言学习工具。在电脑上使用能获得更佳的学习体验和更高的学习效率。
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            EchoLab is a professional language learning tool designed for
-            desktop. Using it on a computer provides a better learning
-            experience and higher efficiency.
           </p>
         </div>
       </div>
