@@ -327,21 +327,29 @@ export default function DownloadSection() {
     return (
       <section
         id="download"
-        className="py-20 lg:py-32 px-6 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 overflow-hidden"
+        className="relative py-20 lg:py-32 px-6 overflow-hidden bg-gradient-to-br from-background via-background to-blue-50/30 dark:to-blue-950/30"
       >
-        <div className="container mx-auto max-w-6xl">
+        {/* 背景装饰 / Background decorations */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-background to-purple-50/30 dark:from-blue-950/40 dark:to-purple-950/30"></div>
+          <div className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/8 via-purple-400/4 to-transparent rounded-full blur-3xl animate-pulse [animation-delay:1s]"></div>
+          <div className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-purple-400/8 via-pink-400/4 to-transparent rounded-full blur-3xl animate-pulse [animation-delay:3s]"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted-foreground)/0.08)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted-foreground)/0.08)_1px,transparent_1px)] bg-[size:16px_28px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_50%,#000_60%,transparent_100%)]"></div>
+        </div>
+
+        <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-gray-100 dark:via-blue-300 dark:to-gray-100 bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 tracking-tight bg-gradient-to-r from-foreground via-blue-600 to-purple-600 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
               立即下载 EchoLab
             </h2>
-            <div className="inline-flex items-center gap-3 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-6 py-4 rounded-2xl border border-blue-200 dark:border-blue-700 mb-8">
+            <div className="inline-flex items-center gap-3 bg-card/90 dark:bg-card/90 backdrop-blur-xl text-blue-700 dark:text-blue-300 px-6 py-4 rounded-2xl border border-blue-200/50 dark:border-blue-700/50 mb-8 shadow-lg">
               <Loader2 className="w-6 h-6 animate-spin" />
               <span className="font-semibold">正在获取最新版本信息...</span>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
               请稍等，我们正在为您获取最新的版本信息
               <br />
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-muted-foreground/70">
                 Please wait while we fetch the latest version information for
                 you
               </span>
@@ -357,23 +365,31 @@ export default function DownloadSection() {
     return (
       <section
         id="download"
-        className="py-20 lg:py-32 px-6 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 overflow-hidden"
+        className="relative py-20 lg:py-32 px-6 overflow-hidden bg-gradient-to-br from-background via-background to-blue-50/30 dark:to-blue-950/30"
       >
-        <div className="container mx-auto max-w-6xl">
+        {/* 背景装饰 / Background decorations */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-background to-purple-50/30 dark:from-blue-950/40 dark:to-purple-950/30"></div>
+          <div className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/8 via-purple-400/4 to-transparent rounded-full blur-3xl animate-pulse [animation-delay:1s]"></div>
+          <div className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-purple-400/8 via-pink-400/4 to-transparent rounded-full blur-3xl animate-pulse [animation-delay:3s]"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted-foreground)/0.08)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted-foreground)/0.08)_1px,transparent_1px)] bg-[size:16px_28px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_50%,#000_60%,transparent_100%)]"></div>
+        </div>
+
+        <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-gray-100 dark:via-blue-300 dark:to-gray-100 bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 tracking-tight bg-gradient-to-r from-foreground via-blue-600 to-purple-600 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
               立即下载 EchoLab
             </h2>
-            <div className="inline-flex items-center gap-3 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-6 py-4 rounded-2xl border border-orange-200 dark:border-orange-700 mb-8">
+            <div className="inline-flex items-center gap-3 bg-card/90 dark:bg-card/90 backdrop-blur-xl text-orange-700 dark:text-orange-300 px-6 py-4 rounded-2xl border border-orange-200/50 dark:border-orange-700/50 mb-8 shadow-lg">
               <AlertCircle className="w-6 h-6" />
               <span className="font-semibold">
                 {error || "版本信息暂时不可用，请稍后再试"}
               </span>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
               无法获取最新版本信息，请稍后刷新页面重试
               <br />
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-muted-foreground/70">
                 Unable to fetch the latest version information, please refresh
                 the page and try again later
               </span>
@@ -427,50 +443,110 @@ export default function DownloadSection() {
   return (
     <section
       id="download"
-      className="py-20 lg:py-32 px-6 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 overflow-hidden"
+      className="relative py-20 lg:py-32 px-6 overflow-hidden bg-gradient-to-br from-background via-background to-blue-50/30 dark:to-blue-950/30"
     >
-      <div className="container mx-auto max-w-6xl">
+      {/* 背景装饰 / Background decorations */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* 主要渐变背景 / Main gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-background to-purple-50/30 dark:from-blue-950/40 dark:to-purple-950/30"></div>
+
+        {/* 动态光晕效果 / Dynamic glow effects */}
+        <div className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/8 via-purple-400/4 to-transparent rounded-full blur-3xl animate-pulse [animation-delay:1s]"></div>
+        <div className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-purple-400/8 via-pink-400/4 to-transparent rounded-full blur-3xl animate-pulse [animation-delay:3s]"></div>
+        <div className="absolute top-1/3 right-1/3 w-[300px] h-[300px] bg-gradient-to-bl from-blue-300/6 to-transparent rounded-full blur-2xl animate-pulse [animation-delay:5s]"></div>
+
+        {/* 网格背景 / Grid background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted-foreground)/0.08)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted-foreground)/0.08)_1px,transparent_1px)] bg-[size:16px_28px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_50%,#000_60%,transparent_100%)]"></div>
+      </div>
+
+      <div className="container mx-auto max-w-6xl relative z-10">
         {/* 头部标题 / Header title */}
         <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 30 }}
+          className="text-center mb-20"
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-gray-100 dark:via-blue-300 dark:to-gray-100 bg-clip-text text-transparent">
-            立即下载 EchoLab
-          </h2>
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8 leading-relaxed">
-            选择适合您系统的版本，开始高效的语言学习之旅
-          </p>
+          {/* 主标题 / Main title */}
+          <motion.h2
+            className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black mb-6 tracking-tight leading-[0.9]"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="bg-gradient-to-r from-gray-900 via-blue-600 to-purple-600 dark:from-gray-100 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              立即下载
+            </span>
+            <br />
+            <span className="text-foreground">EchoLab</span>
+          </motion.h2>
 
-          {/* 版本信息 / Version info */}
-          <motion.div
-            className="inline-flex items-center gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl px-6 py-4 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20 border border-gray-200/50 dark:border-gray-700/50"
+          {/* 副标题 / Subtitle */}
+          <motion.p
+            className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 leading-relaxed font-medium"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500 dark:text-gray-400 font-medium">
-                最新版本：
-              </span>
-              <span className="text-gray-900 dark:text-white font-bold text-lg">
-                {releaseData.version}
-              </span>
-            </div>
+            选择适合您系统的版本，开始高效的语言学习之旅
+            <br />
+            <span className="text-base sm:text-lg text-muted-foreground/70">
+              Choose the right version for your system and start your efficient
+              language learning journey
+            </span>
+          </motion.p>
+
+          {/* 版本信息卡片 / Version info card */}
+          <motion.div
+            className="relative inline-block"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* 版本标签旗帜 / Version type flag */}
             <motion.div
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border ${releaseTypeInfo.color} ${releaseTypeInfo.darkColor}`}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 300, delay: 0.4 }}
+              className={`absolute -top-3 -right-3 z-10 px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg ${releaseTypeInfo.color} ${releaseTypeInfo.darkColor} transform rotate-12`}
+              initial={{ opacity: 0, scale: 0, rotate: 0 }}
+              animate={{ opacity: 1, scale: 1, rotate: 12 }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 20,
+                delay: 0.8,
+              }}
+              whileHover={{
+                scale: 1.1,
+                rotate: 15,
+                transition: { duration: 0.2 },
+              }}
             >
-              {(() => {
-                const IconComponent = releaseTypeInfo.icon;
-                return <IconComponent className="w-4 h-4" />;
-              })()}
-              {releaseTypeInfo.label}
+              <div className="flex items-center gap-1">
+                {(() => {
+                  const IconComponent = releaseTypeInfo.icon;
+                  return <IconComponent className="w-3 h-3" />;
+                })()}
+                {releaseTypeInfo.label}
+              </div>
             </motion.div>
+
+            {/* 主版本信息容器 / Main version info container */}
+            <div className="bg-card/90 dark:bg-card/90 backdrop-blur-2xl rounded-3xl px-8 py-6 shadow-2xl shadow-foreground/5 dark:shadow-foreground/10 border border-border/50 hover:shadow-2xl hover:shadow-foreground/10 dark:hover:shadow-foreground/20 transition-all duration-500">
+              <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/10 dark:to-purple-400/10 rounded-2xl flex items-center justify-center">
+                    <Download className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-sm text-muted-foreground font-medium mb-1">
+                      最新版本 / Latest Version
+                    </div>
+                    <div className="text-2xl font-bold text-foreground tracking-tight">
+                      {releaseData.version}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
 
