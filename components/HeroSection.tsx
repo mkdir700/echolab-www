@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Play, Download, ArrowRight } from "lucide-react";
+import { Download, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
 // 主内容组件 / Main content component
@@ -97,13 +97,6 @@ function MainContent({
               : ""
           }`}
         >
-          <Play
-            className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mr-2 sm:mr-3 flex-shrink-0 ${
-              isAnimated
-                ? "transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
-                : ""
-            }`}
-          />
           <span className="truncate">快速入门</span>
         </Button>
       </div>
