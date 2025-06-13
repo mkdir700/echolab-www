@@ -2,17 +2,18 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // 启用静态导出 / Enable static export
-  output: 'export',
+  // Vercel 部署时不使用静态导出 / Don't use static export for Vercel deployment
+  // output: 'export', // 注释掉静态导出，让 Vercel 使用标准 Next.js 部署
 
-  // 禁用图片优化（静态导出不支持）/ Disable image optimization (not supported in static export)
+  // 图片优化配置 / Image optimization configuration
   images: {
-    unoptimized: true,
+    // Vercel 支持图片优化，可以启用 / Vercel supports image optimization, can be enabled
+    unoptimized: false,
     domains: [], // Add domains for external images as needed
     formats: ["image/webp", "image/avif"],
   },
 
-  // 禁用服务端功能 / Disable server-side features
+  // 服务端功能配置 / Server-side features configuration
   trailingSlash: true,
 
   // Vercel 部署优化 / Vercel deployment optimization
