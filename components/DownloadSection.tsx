@@ -14,28 +14,70 @@ import {
   CheckCircle,
   ArrowRight,
   Loader2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProcessedRelease } from "@/lib/api";
 
-// Tab状态类型
+// Tab状态类型 / Platform tab types
 type PlatformTab = "windows" | "macos" | "linux";
 
-// 检测用户操作系统和架构
+// 设备类型 / Device types
+type DeviceType = "desktop" | "mobile" | "tablet";
+
+// 检测设备类型 / Detect device type
+const detectDeviceType = (): DeviceType => {
+  if (typeof window === "undefined") return "desktop";
+
+  const userAgent = window.navigator.userAgent;
+  const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+  const maxDimension = Math.max(screenWidth, screenHeight);
+  const minDimension = Math.min(screenWidth, screenHeight);
+
+  // 检测移动设备 / Detect mobile devices
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      userAgent
+    ) ||
+    (maxDimension <= 768 && minDimension <= 1024);
+
+  // 检测平板设备 / Detect tablet devices
+  const isTablet =
+    (/iPad|Android/i.test(userAgent) &&
+      maxDimension >= 768 &&
+      maxDimension <= 1024) ||
+    (minDimension >= 768 && minDimension <= 1024);
+
+  if (isMobile && !isTablet) return "mobile";
+  if (isTablet) return "tablet";
+  return "desktop";
+};
+
+// 增强的平台和架构检测 / Enhanced platform and architecture detection
 const detectOSAndArch = () => {
-  if (typeof window === "undefined") return { os: "Unknown", arch: "Unknown" };
+  if (typeof window === "undefined")
+    return {
+      os: "Unknown",
+      arch: "Unknown",
+      deviceType: "desktop" as DeviceType,
+      isMobile: false,
+    };
 
   const userAgent = window.navigator.userAgent;
   const platform = window.navigator.platform;
+  const deviceType = detectDeviceType();
+  const isMobile = deviceType === "mobile" || deviceType === "tablet";
 
   let os = "Unknown";
   let arch = "Unknown";
 
-  // 检测操作系统
+  // 检测操作系统 / Detect operating system
   if (userAgent.indexOf("Win") !== -1) {
     os = "Windows";
-    // Windows 架构检测
+    // Windows 架构检测 / Windows architecture detection
     if (userAgent.indexOf("Win64") !== -1 || userAgent.indexOf("x64") !== -1) {
       arch = "x64";
     } else if (userAgent.indexOf("AMD64") !== -1) {
@@ -43,11 +85,11 @@ const detectOSAndArch = () => {
     } else if (userAgent.indexOf("ARM64") !== -1) {
       arch = "arm64";
     } else {
-      arch = "x64"; // 默认假设是64位
+      arch = "x64"; // 默认假设是64位 / Default to 64-bit
     }
   } else if (userAgent.indexOf("Mac") !== -1) {
     os = "macOS";
-    // macOS 架构检测
+    // macOS 架构检测 / macOS architecture detection
     if (userAgent.indexOf("Intel") !== -1) {
       arch = "intel";
     } else if (
@@ -57,12 +99,14 @@ const detectOSAndArch = () => {
       arch = "apple-silicon";
     } else {
       // 通过 navigator.userAgentData 进一步检测 (Chrome 90+)
-      // @ts-expect-error - userAgentData 是实验性 API
+      // Further detection via navigator.userAgentData (Chrome 90+)
+      // @ts-expect-error - userAgentData 是实验性 API / userAgentData is experimental API
       if (navigator.userAgentData?.platform === "macOS") {
         // 默认假设是 Apple Silicon (M1/M2/M3)，因为新设备更常见
+        // Default to Apple Silicon (M1/M2/M3) as newer devices are more common
         arch = "apple-silicon";
       } else {
-        arch = "universal"; // 通用版本
+        arch = "universal"; // 通用版本 / Universal version
       }
     }
   } else if (userAgent.indexOf("Linux") !== -1) {
@@ -76,7 +120,7 @@ const detectOSAndArch = () => {
     }
   }
 
-  return { os, arch };
+  return { os, arch, deviceType, isMobile };
 };
 
 // 平台信息接口
@@ -135,15 +179,24 @@ const getReleaseTypeInfo = (type: ProcessedRelease["releaseType"]) => {
 };
 
 export default function DownloadSection() {
+  // 状态管理 / State management
   const [detectedInfo, setDetectedInfo] = useState<{
     os: string;
     arch: string;
-  }>({ os: "Unknown", arch: "Unknown" });
+    deviceType: DeviceType;
+    isMobile: boolean;
+  }>({
+    os: "Unknown",
+    arch: "Unknown",
+    deviceType: "desktop",
+    isMobile: false,
+  });
   const [activeTab, setActiveTab] = useState<PlatformTab>("windows");
   const [isMounted, setIsMounted] = useState(false);
   const [releaseData, setReleaseData] = useState<ProcessedRelease | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAllPlatforms, setShowAllPlatforms] = useState(false);
 
   // 客户端获取版本信息的函数
   // Client-side function to fetch release information
@@ -193,6 +246,7 @@ export default function DownloadSection() {
     setDetectedInfo(info);
 
     // 根据检测到的系统自动设置activeTab
+    // Auto-set activeTab based on detected system
     if (info.os.toLowerCase() === "windows") {
       setActiveTab("windows");
     } else if (info.os.toLowerCase() === "macos") {
@@ -230,8 +284,40 @@ export default function DownloadSection() {
       ext: ".AppImage",
     },
   ];
+  // 获取推荐的下载选项 / Get recommended download option
+  const getRecommendedDownload = () => {
+    if (!releaseData || !isMounted) return null;
+
+    const platformKey = activeTab as keyof typeof releaseData.platforms;
+    const platformChannels = releaseData.platforms[platformKey];
+
+    if (!platformChannels || platformChannels.length === 0) return null;
+
+    // 查找主要渠道 / Find primary channel
+    const primaryChannel =
+      platformChannels.find((channel) => channel.primary) ||
+      platformChannels[0];
+
+    // 查找匹配用户架构的变体 / Find variant matching user architecture
+    const matchingVariant = primaryChannel.variants.find((variant) => {
+      const isArchMatch =
+        variant.arch === detectedInfo.arch ||
+        variant.arch.startsWith(detectedInfo.arch + "-");
+      return isArchMatch;
+    });
+
+    // 如果没有匹配的架构，返回第一个变体 / If no matching architecture, return first variant
+    const recommendedVariant = matchingVariant || primaryChannel.variants[0];
+
+    return {
+      channel: primaryChannel,
+      variant: recommendedVariant,
+      platform: platforms.find((p) => p.id === activeTab)!,
+    };
+  };
+
   const handleDownload = (url: string, filename: string) => {
-    // 这里可以添加下载统计或其他逻辑
+    // 这里可以添加下载统计或其他逻辑 / Add download analytics or other logic here
     console.log(`Downloading ${filename}`);
     window.open(url, "_blank");
   };
@@ -311,6 +397,37 @@ export default function DownloadSection() {
   }
 
   const releaseTypeInfo = getReleaseTypeInfo(releaseData.releaseType);
+  const recommendedDownload = getRecommendedDownload();
+
+  // 移动端友好提示组件 / Mobile-friendly prompt component
+  const MobilePrompt = () => (
+    <motion.div
+      className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-2xl p-6 mb-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+          <Smartphone className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            移动设备访问提示 / Mobile Device Notice
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
+            EchoLab
+            是专为桌面端设计的专业语言学习工具。在电脑上使用能获得更佳的学习体验和更高的学习效率。
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            EchoLab is a professional language learning tool designed for
+            desktop. Using it on a computer provides a better learning
+            experience and higher efficiency.
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
 
   return (
     <section
@@ -367,399 +484,523 @@ export default function DownloadSection() {
           </motion.div>
         </motion.div>
 
-        {/* 平台选择Tab / Platform selection tabs */}
+        {/* 移动端提示 / Mobile prompt */}
+        {isMounted && detectedInfo.isMobile && <MobilePrompt />}
+
+        {/* 智能推荐下载区域 / Smart recommended download area */}
+        {recommendedDownload && isMounted && !detectedInfo.isMobile && (
+          <motion.div
+            className="mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                为您推荐
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                基于您的系统自动推荐最适合的版本
+              </p>
+            </div>
+
+            <motion.div
+              className="max-w-2xl mx-auto bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-2xl p-6"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                  <recommendedDownload.platform.icon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {recommendedDownload.platform.title} -{" "}
+                      {recommendedDownload.variant.archName}
+                    </h4>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">
+                    文件大小：{recommendedDownload.variant.size} • 下载次数：
+                    {recommendedDownload.variant.downloadCount.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                onClick={() =>
+                  handleDownload(
+                    recommendedDownload.variant.url,
+                    `EchoLab-${releaseData.version}-${recommendedDownload.variant.arch}${recommendedDownload.platform.ext}`
+                  )
+                }
+                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl py-4 font-semibold text-lg transition-all duration-300 group shadow-lg shadow-blue-600/25"
+              >
+                <motion.div
+                  className="flex items-center justify-center gap-3"
+                  whileHover={{ x: 2 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Download className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                  立即下载
+                  <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </motion.div>
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* 其他平台选项 / Other platform options */}
         <motion.div
           className="mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <div className="flex justify-center mb-8">
-            <div className="relative inline-flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-1.5 rounded-[1.25rem] shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20 border border-gray-200/50 dark:border-gray-700/50">
-              {/* 动画背景滑块 / Animated background slider */}
+          <div className="text-center mb-6">
+            <Button
+              onClick={() => setShowAllPlatforms(!showAllPlatforms)}
+              variant="outline"
+              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/80 rounded-xl px-6 py-3 font-semibold transition-all duration-300"
+            >
               <motion.div
-                className="absolute bg-blue-600 dark:bg-blue-500 rounded-xl shadow-lg shadow-blue-600/20 dark:shadow-blue-500/20"
-                layoutId="activeTab"
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 30,
-                }}
-                style={{
-                  width: `${100 / platforms.length}%`,
-                  height: "calc(100% - 12px)",
-                  top: "6px",
-                  left: `${(platforms.findIndex((p) => p.id === activeTab) * 100) / platforms.length}%`,
-                }}
-              />
+                className="flex items-center gap-2"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                {showAllPlatforms ? (
+                  <>
+                    <ChevronUp className="w-4 h-4" />
+                    收起其他平台选项
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    查看所有平台选项
+                  </>
+                )}
+              </motion.div>
+            </Button>
 
-              {platforms.map((platform) => {
-                const tabId = platform.id as PlatformTab;
-                const isActive = activeTab === tabId;
-                // 只有在客户端挂载后才显示检测到的系统指示器
-                // Only show detected system indicator after client mount
-                const isDetected =
-                  isMounted &&
-                  platform.id.toLowerCase() === detectedInfo.os.toLowerCase();
-
-                return (
-                  <motion.button
-                    key={platform.id}
-                    onClick={() => setActiveTab(tabId)}
-                    className={`relative flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 font-semibold z-10 ${
-                      isActive
-                        ? "text-white"
-                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <motion.div
-                      animate={{
-                        scale: isActive ? 1.1 : 1,
-                      }}
-                      transition={{
-                        duration: 0.3,
-                        type: "spring",
-                        stiffness: 300,
-                      }}
-                    >
-                      <platform.icon className="w-5 h-5" />
-                    </motion.div>
-                    <span className="whitespace-nowrap text-sm sm:text-base">
-                      {platform.title}
-                    </span>
-                    {isDetected && (
-                      <motion.div
-                        className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full shadow-lg"
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
+            {!showAllPlatforms && (
+              <motion.p
+                className="text-sm text-gray-500 dark:text-gray-400 mt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                支持 Windows、macOS 和 Linux 平台
+              </motion.p>
+            )}
           </div>
 
-          {/* 当前选中平台的下载内容 */}
-          <AnimatePresence mode="wait">
-            {(() => {
-              const currentPlatform = platforms.find((p) => p.id === activeTab);
-              if (!currentPlatform) return null;
-
-              const platformChannels =
-                releaseData.platforms[
-                  activeTab as keyof typeof releaseData.platforms
-                ];
-              if (!platformChannels || platformChannels.length === 0) {
-                return (
-                  <motion.div
-                    key={activeTab}
-                    className="max-w-4xl mx-auto text-center py-12"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-[2rem] p-12 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20">
-                      <AlertCircle className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                        暂无下载文件
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        {currentPlatform.title}{" "}
-                        平台的版本正在准备中，请稍后再试或选择其他平台
-                        <br />
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          The version for {currentPlatform.title} platform is
-                          being prepared
-                        </span>
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              }
-
-              return (
-                <motion.div
-                  key={activeTab}
-                  className="max-w-5xl mx-auto"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{
-                    duration: 0.4,
-                    ease: "easeOut",
-                  }}
-                >
-                  {/* 平台信息卡片 / Platform info card */}
-                  <motion.div
-                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-[2rem] p-8 lg:p-10 mb-8 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20"
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
-                  >
+          <AnimatePresence>
+            {showAllPlatforms && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* 平台选择Tab / Platform selection tabs */}
+                <div className="flex justify-center mb-8">
+                  <div className="relative inline-flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-1.5 rounded-[1.25rem] shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20 border border-gray-200/50 dark:border-gray-700/50">
+                    {/* 动画背景滑块 / Animated background slider */}
                     <motion.div
-                      className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.2 }}
-                    >
-                      <motion.div
-                        className="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-blue-500/10 dark:shadow-blue-500/20"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{
-                          duration: 0.2,
-                          type: "spring",
-                          stiffness: 300,
-                        }}
-                      >
-                        <currentPlatform.icon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
-                      </motion.div>
-                      <div className="flex-1">
-                        <motion.h3
-                          className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2"
-                          initial={{ x: -20, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          transition={{ duration: 0.4, delay: 0.3 }}
-                        >
-                          {currentPlatform.title}
-                        </motion.h3>
-                        <motion.p
-                          className="text-gray-600 dark:text-gray-300 text-lg mb-1"
-                          initial={{ x: -20, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          transition={{ duration: 0.4, delay: 0.4 }}
-                        >
-                          {currentPlatform.desc}
-                        </motion.p>
-                        <motion.p
-                          className="text-sm text-gray-500 dark:text-gray-400"
-                          initial={{ x: -20, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          transition={{ duration: 0.4, delay: 0.5 }}
-                        >
-                          文件格式：{currentPlatform.ext} / File format:{" "}
-                          {currentPlatform.ext}
-                        </motion.p>
-                      </div>
-                    </motion.div>
+                      className="absolute bg-blue-600 dark:bg-blue-500 rounded-xl shadow-lg shadow-blue-600/20 dark:shadow-blue-500/20"
+                      layoutId="activeTab"
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 30,
+                      }}
+                      style={{
+                        width: `${100 / platforms.length}%`,
+                        height: "calc(100% - 12px)",
+                        top: "6px",
+                        left: `${(platforms.findIndex((p) => p.id === activeTab) * 100) / platforms.length}%`,
+                      }}
+                    />
 
-                    {/* 下载渠道 / Download channels */}
-                    <motion.div
-                      className="space-y-4"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.6 }}
-                    >
-                      {platformChannels.map((channel, channelIdx) => (
-                        <motion.div
-                          key={channelIdx}
-                          className="bg-gray-50/80 dark:bg-gray-700/50 border border-gray-200/50 dark:border-gray-600/50 rounded-[1.5rem] p-6 lg:p-8"
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{
-                            duration: 0.4,
-                            delay: 0.1 + channelIdx * 0.1,
-                          }}
+                    {platforms.map((platform) => {
+                      const tabId = platform.id as PlatformTab;
+                      const isActive = activeTab === tabId;
+                      // 只有在客户端挂载后才显示检测到的系统指示器
+                      // Only show detected system indicator after client mount
+                      const isDetected =
+                        isMounted &&
+                        platform.id.toLowerCase() ===
+                          detectedInfo.os.toLowerCase();
+
+                      return (
+                        <motion.button
+                          key={platform.id}
+                          onClick={() => setActiveTab(tabId)}
+                          className={`relative flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 font-semibold z-10 ${
+                            isActive
+                              ? "text-white"
+                              : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                          }`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <motion.div
-                            className="flex items-center gap-4 mb-6"
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
+                            animate={{
+                              scale: isActive ? 1.1 : 1,
+                            }}
                             transition={{
                               duration: 0.3,
-                              delay: 0.2 + channelIdx * 0.1,
+                              type: "spring",
+                              stiffness: 300,
                             }}
                           >
-                            <motion.div
-                              className="w-12 h-12 bg-white dark:bg-gray-600 rounded-xl flex items-center justify-center shadow-sm"
-                              whileHover={{ scale: 1.05 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              <GitBranch className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                            </motion.div>
-                            <div className="flex-1">
-                              <h4 className="text-xl font-bold text-gray-900 dark:text-white">
-                                {channel.name}
-                              </h4>
-                              <p className="text-gray-600 dark:text-gray-300 text-sm">
-                                {channel.desc}
-                              </p>
-                            </div>
-                            {channel.primary && (
-                              <motion.span
-                                className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-xl text-sm font-semibold"
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{
-                                  type: "spring",
-                                  stiffness: 300,
-                                  delay: 0.3 + channelIdx * 0.1,
-                                }}
-                              >
-                                推荐渠道
-                              </motion.span>
-                            )}
+                            <platform.icon className="w-5 h-5" />
                           </motion.div>
-                          {/* 架构变体 / Architecture variants */}
-                          <div className="grid gap-3">
-                            {channel.variants.map((variant, variantIdx) => {
-                              // 只有当前平台和架构都匹配时才推荐 / Only recommend when both platform and architecture match
-                              // 只有在客户端挂载后才进行推荐计算，避免水合错误
-                              // Only calculate recommendations after client mount to avoid hydration errors
-                              const isPlatformMatch =
-                                isMounted &&
-                                activeTab.toLowerCase() ===
-                                  detectedInfo.os.toLowerCase();
-                              // 修复架构匹配逻辑，支持带后缀的架构名称（如 x64-deb, x64-appimage）
-                              const isArchMatch =
-                                isMounted &&
-                                (variant.arch === detectedInfo.arch ||
-                                  variant.arch.startsWith(
-                                    detectedInfo.arch + "-"
-                                  ));
-                              const isRecommended =
-                                isPlatformMatch && isArchMatch;
+                          <span className="whitespace-nowrap text-sm sm:text-base">
+                            {platform.title}
+                          </span>
+                          {isDetected && (
+                            <motion.div
+                              className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full shadow-lg"
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            />
+                          )}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-                              return (
-                                <motion.div
-                                  key={variantIdx}
-                                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-[1.25rem] border transition-all duration-300 ${
-                                    isRecommended
-                                      ? "bg-blue-50/80 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 shadow-sm"
-                                      : "bg-white/60 dark:bg-gray-700/40 border-gray-200/60 dark:border-gray-600/60 hover:bg-white/80 dark:hover:bg-gray-700/60 hover:border-gray-300/60 dark:hover:border-gray-500/60"
-                                  }`}
-                                  initial={{
-                                    y: 20,
-                                    opacity: 0,
-                                  }}
-                                  animate={{
-                                    y: 0,
-                                    opacity: 1,
-                                  }}
-                                  transition={{
-                                    duration: 0.3,
-                                    delay: 0.1 + variantIdx * 0.05,
-                                    type: "spring",
-                                    stiffness: 300,
-                                  }}
-                                  whileHover={{
-                                    scale: 1.01,
-                                    transition: { duration: 0.2 },
-                                  }}
-                                >
-                                  <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                                    <motion.div
-                                      className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                                        isRecommended
-                                          ? "bg-blue-100 dark:bg-blue-900/30 shadow-sm"
-                                          : "bg-gray-100 dark:bg-gray-600"
-                                      }`}
-                                      whileHover={{
-                                        scale: 1.05,
-                                        transition: { duration: 0.2 },
-                                      }}
-                                    >
-                                      <Cpu
-                                        className={`w-7 h-7 ${isRecommended ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300"}`}
-                                      />
-                                    </motion.div>
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-gray-900 dark:text-white font-semibold text-lg">
-                                          {variant.archName}
-                                        </span>
-                                        {isRecommended && (
-                                          <motion.div
-                                            className="flex items-center gap-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded-lg text-xs font-semibold"
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{
-                                              type: "spring",
-                                              delay: 0.2 + variantIdx * 0.05,
-                                            }}
-                                          >
-                                            <CheckCircle className="w-3 h-3" />
-                                            推荐
-                                          </motion.div>
-                                        )}
-                                      </div>
-                                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-                                        <span className="flex items-center gap-1">
-                                          <span className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
-                                          文件大小：{variant.size}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                          <span className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
-                                          下载次数：
-                                          {variant.downloadCount.toLocaleString()}
-                                        </span>
-                                        {isMounted &&
-                                          isPlatformMatch &&
-                                          (variant.arch === detectedInfo.arch ||
-                                            variant.arch.startsWith(
-                                              detectedInfo.arch + "-"
-                                            )) && (
-                                            <motion.span
-                                              className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium"
-                                              initial={{ scale: 0 }}
-                                              animate={{ scale: 1 }}
-                                              transition={{
-                                                type: "spring",
-                                                delay: 0.3 + variantIdx * 0.05,
-                                              }}
-                                            >
-                                              <CheckCircle className="w-3 h-3" />
-                                              匹配您的系统
-                                            </motion.span>
-                                          )}
-                                      </div>
-                                    </div>
-                                  </div>
+                {/* 当前选中平台的下载内容 */}
+                <AnimatePresence mode="wait">
+                  {(() => {
+                    const currentPlatform = platforms.find(
+                      (p) => p.id === activeTab
+                    );
+                    if (!currentPlatform) return null;
 
-                                  <motion.div
-                                    className="flex gap-2 sm:flex-col sm:gap-2"
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                  >
-                                    <Button
-                                      onClick={() =>
-                                        handleDownload(
-                                          variant.url,
-                                          `EchoLab-${releaseData.version}-${variant.arch}${currentPlatform.ext}`
-                                        )
-                                      }
-                                      className={`${
-                                        isRecommended
-                                          ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25"
-                                          : "bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-700 text-white"
-                                      } rounded-[1rem] px-6 py-3 font-semibold transition-all duration-300 group border-0`}
-                                    >
-                                      <motion.div
-                                        className="flex items-center gap-2"
-                                        whileHover={{ x: 1 }}
-                                        transition={{ duration: 0.2 }}
-                                      >
-                                        <Download className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
-                                        立即下载
-                                        <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-                                      </motion.div>
-                                    </Button>
-                                  </motion.div>
-                                </motion.div>
-                              );
-                            })}
+                    const platformChannels =
+                      releaseData.platforms[
+                        activeTab as keyof typeof releaseData.platforms
+                      ];
+                    if (!platformChannels || platformChannels.length === 0) {
+                      return (
+                        <motion.div
+                          key={activeTab}
+                          className="max-w-4xl mx-auto text-center py-12"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-[2rem] p-12 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20">
+                            <AlertCircle className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                              暂无下载文件
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                              {currentPlatform.title}{" "}
+                              平台的版本正在准备中，请稍后再试或选择其他平台
+                              <br />
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                The version for {currentPlatform.title} platform
+                                is being prepared
+                              </span>
+                            </p>
                           </div>
                         </motion.div>
-                      ))}
-                    </motion.div>
-                  </motion.div>
-                </motion.div>
-              );
-            })()}
+                      );
+                    }
+
+                    return (
+                      <motion.div
+                        key={activeTab}
+                        className="max-w-5xl mx-auto"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{
+                          duration: 0.4,
+                          ease: "easeOut",
+                        }}
+                      >
+                        {/* 平台信息卡片 / Platform info card */}
+                        <motion.div
+                          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-[2rem] p-8 lg:p-10 mb-8 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20"
+                          initial={{ scale: 0.95, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.4, delay: 0.1 }}
+                        >
+                          <motion.div
+                            className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.4, delay: 0.2 }}
+                          >
+                            <motion.div
+                              className="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-blue-500/10 dark:shadow-blue-500/20"
+                              whileHover={{ scale: 1.05 }}
+                              transition={{
+                                duration: 0.2,
+                                type: "spring",
+                                stiffness: 300,
+                              }}
+                            >
+                              <currentPlatform.icon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                            </motion.div>
+                            <div className="flex-1">
+                              <motion.h3
+                                className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2"
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ duration: 0.4, delay: 0.3 }}
+                              >
+                                {currentPlatform.title}
+                              </motion.h3>
+                              <motion.p
+                                className="text-gray-600 dark:text-gray-300 text-lg mb-1"
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ duration: 0.4, delay: 0.4 }}
+                              >
+                                {currentPlatform.desc}
+                              </motion.p>
+                              <motion.p
+                                className="text-sm text-gray-500 dark:text-gray-400"
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ duration: 0.4, delay: 0.5 }}
+                              >
+                                文件格式：{currentPlatform.ext} / File format:{" "}
+                                {currentPlatform.ext}
+                              </motion.p>
+                            </div>
+                          </motion.div>
+
+                          {/* 下载渠道 / Download channels */}
+                          <motion.div
+                            className="space-y-4"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.4, delay: 0.6 }}
+                          >
+                            {platformChannels.map((channel, channelIdx) => (
+                              <motion.div
+                                key={channelIdx}
+                                className="bg-gray-50/80 dark:bg-gray-700/50 border border-gray-200/50 dark:border-gray-600/50 rounded-[1.5rem] p-6 lg:p-8"
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{
+                                  duration: 0.4,
+                                  delay: 0.1 + channelIdx * 0.1,
+                                }}
+                              >
+                                <motion.div
+                                  className="flex items-center gap-4 mb-6"
+                                  initial={{ x: -20, opacity: 0 }}
+                                  animate={{ x: 0, opacity: 1 }}
+                                  transition={{
+                                    duration: 0.3,
+                                    delay: 0.2 + channelIdx * 0.1,
+                                  }}
+                                >
+                                  <motion.div
+                                    className="w-12 h-12 bg-white dark:bg-gray-600 rounded-xl flex items-center justify-center shadow-sm"
+                                    whileHover={{ scale: 1.05 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    <GitBranch className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                                  </motion.div>
+                                  <div className="flex-1">
+                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white">
+                                      {channel.name}
+                                    </h4>
+                                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                                      {channel.desc}
+                                    </p>
+                                  </div>
+                                  {channel.primary && (
+                                    <motion.span
+                                      className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-xl text-sm font-semibold"
+                                      initial={{ scale: 0 }}
+                                      animate={{ scale: 1 }}
+                                      transition={{
+                                        type: "spring",
+                                        stiffness: 300,
+                                        delay: 0.3 + channelIdx * 0.1,
+                                      }}
+                                    >
+                                      推荐渠道
+                                    </motion.span>
+                                  )}
+                                </motion.div>
+                                {/* 架构变体 / Architecture variants */}
+                                <div className="grid gap-3">
+                                  {channel.variants.map(
+                                    (variant, variantIdx) => {
+                                      // 只有当前平台和架构都匹配时才推荐 / Only recommend when both platform and architecture match
+                                      // 只有在客户端挂载后才进行推荐计算，避免水合错误
+                                      // Only calculate recommendations after client mount to avoid hydration errors
+                                      const isPlatformMatch =
+                                        isMounted &&
+                                        activeTab.toLowerCase() ===
+                                          detectedInfo.os.toLowerCase();
+                                      // 修复架构匹配逻辑，支持带后缀的架构名称（如 x64-deb, x64-appimage）
+                                      const isArchMatch =
+                                        isMounted &&
+                                        (variant.arch === detectedInfo.arch ||
+                                          variant.arch.startsWith(
+                                            detectedInfo.arch + "-"
+                                          ));
+                                      const isRecommended =
+                                        isPlatformMatch && isArchMatch;
+
+                                      return (
+                                        <motion.div
+                                          key={variantIdx}
+                                          className={`flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-[1.25rem] border transition-all duration-300 ${
+                                            isRecommended
+                                              ? "bg-blue-50/80 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 shadow-sm"
+                                              : "bg-white/60 dark:bg-gray-700/40 border-gray-200/60 dark:border-gray-600/60 hover:bg-white/80 dark:hover:bg-gray-700/60 hover:border-gray-300/60 dark:hover:border-gray-500/60"
+                                          }`}
+                                          initial={{
+                                            y: 20,
+                                            opacity: 0,
+                                          }}
+                                          animate={{
+                                            y: 0,
+                                            opacity: 1,
+                                          }}
+                                          transition={{
+                                            duration: 0.3,
+                                            delay: 0.1 + variantIdx * 0.05,
+                                            type: "spring",
+                                            stiffness: 300,
+                                          }}
+                                          whileHover={{
+                                            scale: 1.01,
+                                            transition: { duration: 0.2 },
+                                          }}
+                                        >
+                                          <div className="flex items-center gap-4 mb-4 sm:mb-0">
+                                            <motion.div
+                                              className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+                                                isRecommended
+                                                  ? "bg-blue-100 dark:bg-blue-900/30 shadow-sm"
+                                                  : "bg-gray-100 dark:bg-gray-600"
+                                              }`}
+                                              whileHover={{
+                                                scale: 1.05,
+                                                transition: { duration: 0.2 },
+                                              }}
+                                            >
+                                              <Cpu
+                                                className={`w-7 h-7 ${isRecommended ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300"}`}
+                                              />
+                                            </motion.div>
+                                            <div className="flex-1">
+                                              <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-gray-900 dark:text-white font-semibold text-lg">
+                                                  {variant.archName}
+                                                </span>
+                                                {isRecommended && (
+                                                  <motion.div
+                                                    className="flex items-center gap-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded-lg text-xs font-semibold"
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    transition={{
+                                                      type: "spring",
+                                                      delay:
+                                                        0.2 + variantIdx * 0.05,
+                                                    }}
+                                                  >
+                                                    <CheckCircle className="w-3 h-3" />
+                                                    推荐
+                                                  </motion.div>
+                                                )}
+                                              </div>
+                                              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="flex items-center gap-1">
+                                                  <span className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
+                                                  文件大小：{variant.size}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                  <span className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
+                                                  下载次数：
+                                                  {variant.downloadCount.toLocaleString()}
+                                                </span>
+                                                {isMounted &&
+                                                  isPlatformMatch &&
+                                                  (variant.arch ===
+                                                    detectedInfo.arch ||
+                                                    variant.arch.startsWith(
+                                                      detectedInfo.arch + "-"
+                                                    )) && (
+                                                    <motion.span
+                                                      className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium"
+                                                      initial={{ scale: 0 }}
+                                                      animate={{ scale: 1 }}
+                                                      transition={{
+                                                        type: "spring",
+                                                        delay:
+                                                          0.3 +
+                                                          variantIdx * 0.05,
+                                                      }}
+                                                    >
+                                                      <CheckCircle className="w-3 h-3" />
+                                                      匹配您的系统
+                                                    </motion.span>
+                                                  )}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <motion.div
+                                            className="flex gap-2 sm:flex-col sm:gap-2"
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                          >
+                                            <Button
+                                              onClick={() =>
+                                                handleDownload(
+                                                  variant.url,
+                                                  `EchoLab-${releaseData.version}-${variant.arch}${currentPlatform.ext}`
+                                                )
+                                              }
+                                              className={`${
+                                                isRecommended
+                                                  ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                                                  : "bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-700 text-white"
+                                              } rounded-[1rem] px-6 py-3 font-semibold transition-all duration-300 group border-0`}
+                                            >
+                                              <motion.div
+                                                className="flex items-center gap-2"
+                                                whileHover={{ x: 1 }}
+                                                transition={{ duration: 0.2 }}
+                                              >
+                                                <Download className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+                                                立即下载
+                                                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                                              </motion.div>
+                                            </Button>
+                                          </motion.div>
+                                        </motion.div>
+                                      );
+                                    }
+                                  )}
+                                </div>
+                              </motion.div>
+                            ))}
+                          </motion.div>
+                        </motion.div>
+                      </motion.div>
+                    );
+                  })()}
+                </AnimatePresence>
+              </motion.div>
+            )}
           </AnimatePresence>
         </motion.div>
       </div>
