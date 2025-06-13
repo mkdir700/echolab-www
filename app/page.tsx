@@ -25,7 +25,7 @@ async function getLatestRelease(): Promise<ProcessedRelease | null> {
     if (isBuilding) {
       // 构建时直接请求 GitHub API
       // During build, fetch directly from GitHub API
-      const { getLatestReleaseFromGitHub } = await import("@/lib/github-api");
+      const { getLatestReleaseFromGitHub } = await import("../lib/github-api");
       return await getLatestReleaseFromGitHub();
     } else {
       // 运行时使用我们的 API 路由
