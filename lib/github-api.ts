@@ -1,4 +1,4 @@
-import { ProcessedRelease, GitHubAsset, GitHubRelease, ReleaseChannel, determineReleaseType } from '@/lib/api';
+import { ProcessedRelease, GitHubAsset, GitHubRelease, determineReleaseType } from '@/lib/api';
 
 // 从 GitHub API 获取最新版本信息的函数
 // Function to fetch latest release information from GitHub API
