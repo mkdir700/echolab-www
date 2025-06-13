@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, ArrowRight, BookOpen } from "lucide-react";
+import { Download, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 
 // 主内容组件 / Main content component
@@ -80,13 +80,6 @@ function MainContent({
             }`}
           />
           <span className="truncate">立即下载</span>
-          <ArrowRight
-            className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ml-2 sm:ml-3 flex-shrink-0 ${
-              isAnimated
-                ? "transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
-                : ""
-            }`}
-          />
         </Button>
         <Button
           size="lg"
@@ -112,13 +105,6 @@ function MainContent({
             }`}
           />
           <span className="truncate">快速入门</span>
-          <ArrowRight
-            className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ml-2 sm:ml-3 flex-shrink-0 ${
-              isAnimated
-                ? "transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
-                : ""
-            }`}
-          />
         </Button>
       </div>
 

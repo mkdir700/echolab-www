@@ -6,6 +6,7 @@ import {
   ThemeProvider,
   ThemeScript,
 } from "@/components/providers/ThemeProvider";
+import { ClientThemeInitializer } from "@/components/providers/ClientThemeInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider defaultTheme="system" enableSystem attribute="class">
+        <ThemeProvider defaultTheme="auto" enableSystem attribute="class">
+          <ClientThemeInitializer />
           <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
       </body>

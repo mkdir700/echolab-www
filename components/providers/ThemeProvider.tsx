@@ -23,7 +23,7 @@ interface ThemeProviderProps {
   /** 子组件 / Child components */
   children: ReactNode;
   /** 默认主题 / Default theme */
-  defaultTheme?: "light" | "dark" | "system";
+  defaultTheme?: "light" | "dark" | "system" | "auto";
   /** 是否启用系统主题检测 / Whether to enable system theme detection */
   enableSystem?: boolean;
   /** 自定义属性名称 / Custom attribute name */
@@ -36,7 +36,7 @@ interface ThemeProviderProps {
  */
 export function ThemeProvider({
   children,
-  defaultTheme = "system", // eslint-disable-line @typescript-eslint/no-unused-vars
+  defaultTheme = "auto", // eslint-disable-line @typescript-eslint/no-unused-vars
   enableSystem = true, // eslint-disable-line @typescript-eslint/no-unused-vars
   attribute = "class", // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ThemeProviderProps) {
@@ -76,9 +76,27 @@ export function ThemeScript() {
       try {
         // 静态导出优化：更快的主题应用
         // Static export optimization: faster theme application
-        var theme = localStorage.getItem('theme');
-        var systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        var resolvedTheme = theme === 'system' || !theme ? systemTheme : theme;
+        var theme = localStorage.getItem('theme') || 'auto';
+        var resolvedTheme = 'light'; // 默认主题，避免闪烁
+
+        // 简化的主题解析，避免水合不匹配
+        // Simplified theme resolution to avoid hydration mismatch
+        if (theme === 'dark') {
+          resolvedTheme = 'dark';
+        } else if (theme === 'light') {
+          resolvedTheme = 'light';
+        } else if (theme === 'system') {
+          // 系统主题检测
+          // System theme detection
+          var systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          resolvedTheme = systemTheme;
+        } else {
+          // auto主题：根据时间自动切换
+          // auto theme: automatically switch based on time
+          var now = new Date();
+          var hour = now.getHours();
+          resolvedTheme = hour >= 6 && hour < 18 ? 'light' : 'dark';
+        }
 
         // 确保主题类正确应用
         // Ensure theme classes are correctly applied
