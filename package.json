@@ -13,7 +13,7 @@
     "vercel:build": "vercel build",
     "vercel:deploy": "vercel --prod",
     "vercel:preview": "vercel",
-    "deploy": "npm run build && vercel --prod"
+    "deploy": "pnpm run build && vercel --prod"
   },
   "dependencies": {
     "@radix-ui/react-separator": "^1.1.7",
