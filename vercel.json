@@ -1,25 +1,11 @@
 {
   "version": 2,
   "name": "echolab-www",
-  "alias": ["echolab.vercel.app"],
-  "regions": ["hkg1", "sin1", "nrt1"],
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  },
   "buildCommand": "npm run build",
   "outputDirectory": "out",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
   "framework": "nextjs",
-  "functions": {},
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -35,23 +21,6 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
-        }
-      ]
-    },
-    {
-      "source": "/static/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
         }
       ]
     },
@@ -63,34 +32,6 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
-    },
-    {
-      "source": "/images/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=86400"
-        }
-      ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/home",
-      "destination": "/",
-      "permanent": true
-    }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "github": {
-    "enabled": true,
-    "autoAlias": true
-  }
+  ]
 }
