@@ -16,9 +16,6 @@ const nextConfig: NextConfig = {
   // 服务端功能配置 / Server-side features configuration
   trailingSlash: true,
 
-  // Vercel 部署优化 / Vercel deployment optimization
-  distDir: '.next',
-
   // 基础路径配置（如果需要子路径部署）/ Base path configuration (if subdirectory deployment needed)
   // basePath: '',
   // assetPrefix: '',

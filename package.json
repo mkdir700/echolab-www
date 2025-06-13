@@ -5,9 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "build:static": "next build && next export",
     "start": "next start",
-    "serve": "npx serve out",
     "lint": "next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
