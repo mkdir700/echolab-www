@@ -594,7 +594,7 @@ export default function DownloadSection() {
               >
                 {/* 平台选择Tab / Platform selection tabs */}
                 <div className="flex justify-center mb-8">
-                  <div className="relative inline-flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-1.5 rounded-[1.25rem] shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20 border border-gray-200/50 dark:border-gray-700/50">
+                  <div className="relative inline-flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-1 rounded-[1.25rem] shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20 border border-gray-200/50 dark:border-gray-700/50">
                     {/* 动画背景滑块 / Animated background slider */}
                     <motion.div
                       className="absolute bg-blue-600 dark:bg-blue-500 rounded-xl shadow-lg shadow-blue-600/20 dark:shadow-blue-500/20"
@@ -605,10 +605,10 @@ export default function DownloadSection() {
                         damping: 30,
                       }}
                       style={{
-                        width: `${100 / platforms.length}%`,
-                        height: "calc(100% - 12px)",
-                        top: "6px",
-                        left: `${(platforms.findIndex((p) => p.id === activeTab) * 100) / platforms.length}%`,
+                        width: `calc(${100 / platforms.length}% - 4px)`,
+                        height: "calc(100% - 8px)",
+                        top: "4px",
+                        left: `calc(${(platforms.findIndex((p) => p.id === activeTab) * 100) / platforms.length}% + 2px)`,
                       }}
                     />
 
@@ -626,7 +626,7 @@ export default function DownloadSection() {
                         <motion.button
                           key={platform.id}
                           onClick={() => setActiveTab(tabId)}
-                          className={`relative flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 font-semibold z-10 ${
+                          className={`relative flex items-center gap-2.5 px-4 py-3 rounded-xl transition-all duration-300 font-semibold z-10 min-w-0 flex-1 justify-center ${
                             isActive
                               ? "text-white"
                               : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -645,14 +645,14 @@ export default function DownloadSection() {
                               stiffness: 300,
                             }}
                           >
-                            <platform.icon className="w-5 h-5" />
+                            <platform.icon className="w-5 h-5 flex-shrink-0" />
                           </motion.div>
-                          <span className="whitespace-nowrap text-sm sm:text-base">
+                          <span className="whitespace-nowrap text-sm sm:text-base font-medium">
                             {platform.title}
                           </span>
                           {isDetected && (
                             <motion.div
-                              className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full shadow-lg"
+                              className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-lg"
                               animate={{ scale: [1, 1.2, 1] }}
                               transition={{ duration: 2, repeat: Infinity }}
                             />
