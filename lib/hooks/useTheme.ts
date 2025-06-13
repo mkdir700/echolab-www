@@ -37,29 +37,6 @@ const getSystemTheme = (): "light" | "dark" => {
 };
 
 /**
- * 根据当地时间获取自动主题
- * Get auto theme based on local time
- */
-const getAutoTheme = (): "light" | "dark" => {
-  // 在服务器端始终返回light，避免水合不匹配
-  // Always return light on server-side to avoid hydration mismatch
-  if (typeof window === "undefined") return "light";
-
-  try {
-    const now = new Date();
-    const hour = now.getHours();
-
-    // 6:00-18:00 为白天（亮色主题），其他时间为夜晚（暗色主题）
-    // 6:00-18:00 is daytime (light theme), other times are nighttime (dark theme)
-    return hour >= 6 && hour < 18 ? "light" : "dark";
-  } catch {
-    // 如果获取时间失败，默认返回light
-    // If getting time fails, default to light
-    return "light";
-  }
-};
-
-/**
  * 从localStorage获取保存的主题设置
  * Get saved theme setting from localStorage
  */
@@ -85,14 +62,16 @@ export function useTheme(): UseThemeReturn {
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [isMounted, setIsMounted] = useState(false);
 
-  // 解析主题：将system和auto转换为实际的light/dark
-  // Resolve theme: convert system and auto to actual light/dark
+  // 解析主题：将system转换为实际的light/dark，auto主题由ClientThemeInitializer处理
+  // Resolve theme: convert system to actual light/dark, auto theme handled by ClientThemeInitializer
   const resolveTheme = useCallback((currentTheme: Theme): "light" | "dark" => {
     if (currentTheme === "system") {
       return getSystemTheme();
     }
     if (currentTheme === "auto") {
-      return getAutoTheme();
+      // auto主题在客户端由ClientThemeInitializer处理，这里返回默认值
+      // auto theme is handled by ClientThemeInitializer on client-side, return default here
+      return "light";
     }
     return currentTheme;
   }, []);
@@ -165,27 +144,8 @@ export function useTheme(): UseThemeReturn {
     };
   }, [theme, applyTheme]);
 
-  // 监听时间变化以支持auto主题
-  // Listen to time changes to support auto theme
-  useEffect(() => {
-    if (typeof window === "undefined" || theme !== "auto") return;
-
-    const checkTimeTheme = () => {
-      const newResolvedTheme = getAutoTheme();
-      if (newResolvedTheme !== resolvedTheme) {
-        applyTheme(newResolvedTheme);
-      }
-    };
-
-    // 每分钟检查一次时间主题
-    // Check time theme every minute
-    const interval = setInterval(checkTimeTheme, 60000);
-
-    // 清理函数 / Cleanup function
-    return () => {
-      clearInterval(interval);
-    };
-  }, [theme, resolvedTheme, applyTheme]);
+  // auto主题的时间监听现在由ClientThemeInitializer组件处理
+  // Time listening for auto theme is now handled by ClientThemeInitializer component
 
   // 组件挂载时初始化主题
   // Initialize theme on component mount

@@ -64,7 +64,7 @@ export function SimpleThemeToggle({
   variant = "ghost",
   disableFocus = false,
 }: Omit<ThemeToggleProps, "showLabel">) {
-  const { theme, resolvedTheme, setTheme, isMounted } = useThemeContext();
+  const { theme, setTheme, isMounted } = useThemeContext();
 
   // 循环切换主题的函数
   // Function to cycle through themes

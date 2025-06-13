@@ -67,20 +67,20 @@ export function useThemeContext(): UseThemeReturn {
 }
 
 /**
- * 主题切换脚本，用于避免静态导出时的主题闪烁
- * Theme toggle script to prevent theme flashing during static export
+ * 简化的主题脚本，仅处理基本主题，避免水合不匹配
+ * Simplified theme script that only handles basic themes to avoid hydration mismatch
  */
 export function ThemeScript() {
   const script = `
     (function() {
       try {
-        // 静态导出优化：更快的主题应用
-        // Static export optimization: faster theme application
-        var theme = localStorage.getItem('theme') || 'auto';
-        var resolvedTheme = 'light'; // 默认主题，避免闪烁
+        // 只处理明确的主题设置，避免时间相关的计算
+        // Only handle explicit theme settings, avoid time-related calculations
+        var theme = localStorage.getItem('theme') || 'light';
+        var resolvedTheme = 'light'; // 默认主题
 
-        // 简化的主题解析，避免水合不匹配
-        // Simplified theme resolution to avoid hydration mismatch
+        // 只处理明确的主题值，auto主题完全由客户端处理
+        // Only handle explicit theme values, auto theme is handled entirely by client
         if (theme === 'dark') {
           resolvedTheme = 'dark';
         } else if (theme === 'light') {
@@ -90,28 +90,19 @@ export function ThemeScript() {
           // System theme detection
           var systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           resolvedTheme = systemTheme;
-        } else {
-          // auto主题：根据时间自动切换
-          // auto theme: automatically switch based on time
-          var now = new Date();
-          var hour = now.getHours();
-          resolvedTheme = hour >= 6 && hour < 18 ? 'light' : 'dark';
         }
+        // auto主题不在这里处理，完全由客户端组件处理
+        // auto theme is not handled here, completely handled by client components
 
-        // 确保主题类正确应用
-        // Ensure theme classes are correctly applied
+        // 应用主题
+        // Apply theme
         var root = document.documentElement;
         root.classList.remove('light', 'dark');
         root.classList.add(resolvedTheme);
-
-        // 设置CSS变量以支持更好的主题切换
-        // Set CSS variables for better theme switching
-        root.style.setProperty('--initial-theme', resolvedTheme);
       } catch (e) {
-        // 静默处理错误，避免影响页面加载
-        // Silently handle errors to avoid affecting page load
-        console.warn('Failed to apply theme:', e);
-        document.documentElement.classList.add('light'); // 默认回退到浅色主题
+        // 静默处理错误
+        // Silently handle errors
+        document.documentElement.classList.add('light');
       }
     })();
   `;
