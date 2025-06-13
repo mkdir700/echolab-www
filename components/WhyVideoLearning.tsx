@@ -11,33 +11,18 @@ import {
   Lightbulb,
   MessageCircle,
   Sparkles,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+
+// Swiper imports / Swiper 导入
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+
+// 自定义样式 / Custom styles
+import styles from "./WhyVideoLearning.module.css";
 
 export default function WhyVideoLearning() {
-  // 移动端轮播状态 / Mobile carousel state
-  const [currentAdvantageSlide, setCurrentAdvantageSlide] = useState(0);
-  const [currentMethodSlide, setCurrentMethodSlide] = useState(0);
-
-  // 触摸滑动状态 / Touch swipe state
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [isAttemptingBoundarySwipe, setIsAttemptingBoundarySwipe] =
-    useState(false);
-  const [bounceDirection, setBounceDirection] = useState<
-    "left" | "right" | null
-  >(null);
-
-  // 实时拖拽状态 / Real-time drag state
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [dragStartTime, setDragStartTime] = useState<number | null>(null);
-  const [activeCarousel, setActiveCarousel] = useState<
-    "advantage" | "method" | null
-  >(null);
-
   // 核心优势数据 / Core advantages data
   const advantages = [
     {
@@ -159,149 +144,47 @@ export default function WhyVideoLearning() {
     },
   ];
 
-  // 触摸滑动处理函数 / Touch swipe handlers
-  const minSwipeDistance = 50; // 最小滑动距离 / Minimum swipe distance
-  const maxDragResistance = 0.3; // 边界拖拽阻力 / Boundary drag resistance
-
-  const onTouchStart = (e: React.TouchEvent, type: "advantage" | "method") => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-    setDragStartTime(Date.now());
-    setIsDragging(true);
-    setDragOffset(0);
-    setActiveCarousel(type);
+  // Swiper 配置 / Swiper configuration
+  const swiperConfig = {
+    modules: [Pagination],
+    spaceBetween: 16,
+    slidesPerView: 1,
+    pagination: {
+      clickable: true,
+      dynamicBullets: false,
+    },
+    // 移动端优化配置 / Mobile optimization config
+    touchRatio: 1,
+    touchAngle: 45,
+    grabCursor: true,
+    // 边界弹性效果 / Boundary elastic effect
+    resistance: true,
+    resistanceRatio: 0.85,
+    // 滑动方向锁定和触摸优化 / Swipe direction lock and touch optimization
+    simulateTouch: true,
+    allowTouchMove: true,
+    // 过渡效果优化 / Transition effect optimization
+    speed: 300,
+    effect: "slide" as const,
+    // 循环模式禁用（避免内容重复）/ Loop mode disabled (avoid content duplication)
+    loop: false,
+    // 居中模式 / Centered mode
+    centeredSlides: false,
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (!touchStart || !isDragging || !activeCarousel) return;
-
-    setTouchEnd(e.targetTouches[0].clientX);
-    const currentX = e.targetTouches[0].clientX;
-    const deltaX = currentX - touchStart;
-
-    // 防止页面滚动 / Prevent page scrolling
-    if (Math.abs(deltaX) > 10) {
-      e.preventDefault();
-    }
-
-    // 计算当前轮播的边界 / Calculate current carousel boundaries
-    const isAdvantage = activeCarousel === "advantage";
-    const currentSlide = isAdvantage
-      ? currentAdvantageSlide
-      : currentMethodSlide;
-    const maxSlides = isAdvantage ? maxAdvantageSlides : maxMethodSlides;
-    const canGoLeft = currentSlide > 0;
-    const canGoRight = currentSlide < maxSlides - 1;
-
-    // 计算拖拽偏移量，在边界处添加阻力 / Calculate drag offset with resistance at boundaries
-    let offset = deltaX;
-
-    // 左边界阻力 / Left boundary resistance
-    if (deltaX > 0 && !canGoLeft) {
-      offset = deltaX * maxDragResistance;
-    }
-    // 右边界阻力 / Right boundary resistance
-    else if (deltaX < 0 && !canGoRight) {
-      offset = deltaX * maxDragResistance;
-    }
-
-    setDragOffset(offset);
-  };
-
-  const onTouchEnd = () => {
-    if (
-      !touchStart ||
-      !touchEnd ||
-      !isDragging ||
-      !activeCarousel ||
-      !dragStartTime
-    ) {
-      // 重置拖拽状态 / Reset drag state
-      setIsDragging(false);
-      setDragOffset(0);
-      setActiveCarousel(null);
-      return;
-    }
-
-    const distance = touchStart - touchEnd;
-    const dragTime = Date.now() - dragStartTime;
-    const velocity = Math.abs(distance) / dragTime; // 像素/毫秒 / pixels per millisecond
-
-    // 判断是否应该翻页：基于距离和速度 / Determine if should flip page: based on distance and velocity
-    const shouldFlip = Math.abs(distance) > minSwipeDistance || velocity > 0.5;
-    const isLeftSwipe = distance > 0;
-    const isRightSwipe = distance < 0;
-
-    // 获取当前轮播的边界信息 / Get current carousel boundary info
-    const isAdvantage = activeCarousel === "advantage";
-    const currentSlide = isAdvantage
-      ? currentAdvantageSlide
-      : currentMethodSlide;
-    const maxSlides = isAdvantage ? maxAdvantageSlides : maxMethodSlides;
-    const canGoLeft = currentSlide > 0;
-    const canGoRight = currentSlide < maxSlides - 1;
-
-    if (shouldFlip) {
-      if (isLeftSwipe && canGoRight) {
-        // 向左滑动，显示下一页 / Swipe left, show next page
-        if (isAdvantage) {
-          nextAdvantageSlide();
-        } else {
-          nextMethodSlide();
-        }
-      } else if (isRightSwipe && canGoLeft) {
-        // 向右滑动，显示上一页 / Swipe right, show previous page
-        if (isAdvantage) {
-          prevAdvantageSlide();
-        } else {
-          prevMethodSlide();
-        }
-      } else if ((isLeftSwipe && !canGoRight) || (isRightSwipe && !canGoLeft)) {
-        // 边界反弹效果 / Boundary bounce effect
-        setIsAttemptingBoundarySwipe(true);
-        setBounceDirection(isLeftSwipe ? "left" : "right");
-        setTimeout(() => {
-          setIsAttemptingBoundarySwipe(false);
-          setBounceDirection(null);
-        }, 400);
-      }
-    }
-
-    // 重置拖拽状态 / Reset drag state
-    setIsDragging(false);
-    setDragOffset(0);
-    setActiveCarousel(null);
-  };
-
-  // 轮播控制函数 / Carousel control functions
+  // 轮播数据处理 / Carousel data processing
   const maxAdvantageSlides = Math.ceil(advantages.length / 2);
   const maxMethodSlides = Math.ceil(learningSteps.length / 2);
 
-  const nextAdvantageSlide = () => {
-    setCurrentAdvantageSlide((prev) =>
-      prev < maxAdvantageSlides - 1 ? prev + 1 : prev
-    );
-  };
+  // 将优势数据按每页2个分组 / Group advantages data by 2 per page
+  const advantageSlides = Array.from({ length: maxAdvantageSlides }).map(
+    (_, slideIndex) => advantages.slice(slideIndex * 2, slideIndex * 2 + 2)
+  );
 
-  const prevAdvantageSlide = () => {
-    setCurrentAdvantageSlide((prev) => (prev > 0 ? prev - 1 : prev));
-  };
-
-  const nextMethodSlide = () => {
-    setCurrentMethodSlide((prev) =>
-      prev < maxMethodSlides - 1 ? prev + 1 : prev
-    );
-  };
-
-  const prevMethodSlide = () => {
-    setCurrentMethodSlide((prev) => (prev > 0 ? prev - 1 : prev));
-  };
-
-  // 检查是否可以滑动 / Check if sliding is possible
-  const canSlidePrevAdvantage = currentAdvantageSlide > 0;
-  const canSlideNextAdvantage = currentAdvantageSlide < maxAdvantageSlides - 1;
-  const canSlidePrevMethod = currentMethodSlide > 0;
-  const canSlideNextMethod = currentMethodSlide < maxMethodSlides - 1;
+  // 将学习步骤数据按每页2个分组 / Group learning steps data by 2 per page
+  const methodSlides = Array.from({ length: maxMethodSlides }).map(
+    (_, slideIndex) => learningSteps.slice(slideIndex * 2, slideIndex * 2 + 2)
+  );
 
   return (
     <section
@@ -437,113 +320,44 @@ export default function WhyVideoLearning() {
           </div>
 
           <div className="relative">
-            {/* 轮播容器 / Carousel container */}
-            <div
-              className="overflow-hidden rounded-2xl cursor-grab active:cursor-grabbing"
-              onTouchStart={(e) => onTouchStart(e, "advantage")}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
-              style={{ touchAction: "pan-y pinch-zoom" }}
+            {/* Swiper 轮播容器 / Swiper carousel container */}
+            <Swiper
+              {...swiperConfig}
+              className={`${styles["advantages-swiper"]} rounded-2xl`}
             >
-              <div
-                className={`flex ${
-                  isDragging && activeCarousel === "advantage"
-                    ? "" // 拖拽时不使用过渡动画 / No transition during drag
-                    : "transition-all duration-300 ease-out"
-                } ${
-                  isAttemptingBoundarySwipe
-                    ? bounceDirection === "left"
-                      ? "animate-bounce-left"
-                      : "animate-bounce-right"
-                    : ""
-                }`}
-                style={{
-                  transform: `translateX(calc(-${currentAdvantageSlide * 100}% + ${
-                    activeCarousel === "advantage" ? dragOffset : 0
-                  }px))`,
-                }}
-              >
-                {Array.from({ length: Math.ceil(advantages.length / 2) }).map(
-                  (_, slideIndex) => (
-                    <div key={slideIndex} className="w-full flex-shrink-0 px-2">
-                      <div className="space-y-4">
-                        {advantages
-                          .slice(slideIndex * 2, slideIndex * 2 + 2)
-                          .map((advantage, index) => {
-                            const IconComponent = advantage.icon;
-                            return (
-                              <div
-                                key={slideIndex * 2 + index}
-                                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
-                              >
-                                <div
-                                  className={`w-12 h-12 bg-gradient-to-br ${advantage.color} rounded-2xl flex items-center justify-center mb-4 shadow-lg`}
-                                >
-                                  <IconComponent className="w-6 h-6 text-white" />
-                                </div>
-                                <h4 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">
-                                  {advantage.title}
-                                </h4>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                                  {advantage.titleEn}
-                                </p>
-                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
-                                  {advantage.description}
-                                </p>
-                              </div>
-                            );
-                          })}
-                      </div>
+              {advantageSlides.map((slideAdvantages, slideIndex) => (
+                <SwiperSlide key={slideIndex}>
+                  <div className="px-2">
+                    <div className="space-y-4">
+                      {slideAdvantages.map((advantage, index) => {
+                        const IconComponent = advantage.icon;
+                        return (
+                          <div
+                            key={slideIndex * 2 + index}
+                            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
+                          >
+                            <div
+                              className={`w-12 h-12 bg-gradient-to-br ${advantage.color} rounded-2xl flex items-center justify-center mb-4 shadow-lg`}
+                            >
+                              <IconComponent className="w-6 h-6 text-white" />
+                            </div>
+                            <h4 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">
+                              {advantage.title}
+                            </h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                              {advantage.titleEn}
+                            </p>
+                            <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
+                              {advantage.description}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
-                  )
-                )}
-              </div>
-            </div>
-
-            {/* 轮播控制按钮 - 仅在桌面端显示 / Carousel control buttons - Desktop only */}
-            <button
-              onClick={prevAdvantageSlide}
-              disabled={!canSlidePrevAdvantage}
-              className={`hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full shadow-lg items-center justify-center border transition-colors ${
-                canSlidePrevAdvantage
-                  ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  : "bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-800 cursor-not-allowed opacity-50"
-              }`}
-            >
-              <ChevronLeft
-                className={`w-5 h-5 ${canSlidePrevAdvantage ? "text-gray-600 dark:text-gray-300" : "text-gray-400 dark:text-gray-600"}`}
-              />
-            </button>
-            <button
-              onClick={nextAdvantageSlide}
-              disabled={!canSlideNextAdvantage}
-              className={`hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full shadow-lg items-center justify-center border transition-colors ${
-                canSlideNextAdvantage
-                  ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  : "bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-800 cursor-not-allowed opacity-50"
-              }`}
-            >
-              <ChevronRight
-                className={`w-5 h-5 ${canSlideNextAdvantage ? "text-gray-600 dark:text-gray-300" : "text-gray-400 dark:text-gray-600"}`}
-              />
-            </button>
-
-            {/* 轮播指示器 / Carousel indicators */}
-            <div className="flex justify-center mt-6 space-x-2">
-              {Array.from({ length: Math.ceil(advantages.length / 2) }).map(
-                (_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentAdvantageSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentAdvantageSlide
-                        ? "bg-blue-600 dark:bg-blue-400"
-                        : "bg-gray-300 dark:bg-gray-600"
-                    }`}
-                  />
-                )
-              )}
-            </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         </div>
 
@@ -564,125 +378,56 @@ export default function WhyVideoLearning() {
             </div>
 
             <div className="relative">
-              {/* 学习方法轮播容器 / Learning method carousel container */}
-              <div
-                className="overflow-hidden rounded-2xl cursor-grab active:cursor-grabbing"
-                onTouchStart={(e) => onTouchStart(e, "method")}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-                style={{ touchAction: "pan-y pinch-zoom" }}
+              {/* Swiper 学习方法轮播容器 / Swiper learning method carousel container */}
+              <Swiper
+                {...swiperConfig}
+                className={`${styles["methods-swiper"]} rounded-2xl`}
               >
-                <div
-                  className={`flex ${
-                    isDragging && activeCarousel === "method"
-                      ? "" // 拖拽时不使用过渡动画 / No transition during drag
-                      : "transition-all duration-300 ease-out"
-                  } ${
-                    isAttemptingBoundarySwipe
-                      ? bounceDirection === "left"
-                        ? "animate-bounce-left"
-                        : "animate-bounce-right"
-                      : ""
-                  }`}
-                  style={{
-                    transform: `translateX(calc(-${currentMethodSlide * 100}% + ${
-                      activeCarousel === "method" ? dragOffset : 0
-                    }px))`,
-                  }}
-                >
-                  {Array.from({
-                    length: Math.ceil(learningSteps.length / 2),
-                  }).map((_, slideIndex) => (
-                    <div key={slideIndex} className="w-full flex-shrink-0 px-2">
+                {methodSlides.map((slideMethods, slideIndex) => (
+                  <SwiperSlide key={slideIndex}>
+                    <div className="px-2">
                       <div className="space-y-4">
-                        {learningSteps
-                          .slice(slideIndex * 2, slideIndex * 2 + 2)
-                          .map((step, index) => {
-                            const IconComponent = step.icon;
-                            return (
-                              <div
-                                key={slideIndex * 2 + index}
-                                className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700"
-                              >
-                                <div className="flex items-start space-x-4">
-                                  <div
-                                    className={`w-10 h-10 bg-gradient-to-br ${step.color} rounded-xl flex items-center justify-center shadow-lg flex-shrink-0`}
-                                  >
-                                    <IconComponent className="w-5 h-5 text-white" />
+                        {slideMethods.map((step, index) => {
+                          const IconComponent = step.icon;
+                          return (
+                            <div
+                              key={slideIndex * 2 + index}
+                              className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700"
+                            >
+                              <div className="flex items-start space-x-4">
+                                <div
+                                  className={`w-10 h-10 bg-gradient-to-br ${step.color} rounded-xl flex items-center justify-center shadow-lg flex-shrink-0`}
+                                >
+                                  <IconComponent className="w-5 h-5 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <span className="text-base font-bold text-gray-900 dark:text-white">
+                                      {step.day}
+                                    </span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                      {step.dayEn}
+                                    </span>
                                   </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                      <span className="text-base font-bold text-gray-900 dark:text-white">
-                                        {step.day}
-                                      </span>
-                                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                                        {step.dayEn}
-                                      </span>
-                                    </div>
-                                    <h4 className="text-base font-semibold mb-1 text-gray-900 dark:text-white">
-                                      {step.title}
-                                    </h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                      {step.titleEn}
-                                    </p>
-                                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                                      {step.description}
-                                    </p>
-                                  </div>
+                                  <h4 className="text-base font-semibold mb-1 text-gray-900 dark:text-white">
+                                    {step.title}
+                                  </h4>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                    {step.titleEn}
+                                  </p>
+                                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                                    {step.description}
+                                  </p>
                                 </div>
                               </div>
-                            );
-                          })}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 学习方法轮播控制按钮 - 仅在桌面端显示 / Learning method carousel control buttons - Desktop only */}
-              <button
-                onClick={prevMethodSlide}
-                disabled={!canSlidePrevMethod}
-                className={`hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full shadow-lg items-center justify-center border transition-colors ${
-                  canSlidePrevMethod
-                    ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                    : "bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-800 cursor-not-allowed opacity-50"
-                }`}
-              >
-                <ChevronLeft
-                  className={`w-5 h-5 ${canSlidePrevMethod ? "text-gray-600 dark:text-gray-300" : "text-gray-400 dark:text-gray-600"}`}
-                />
-              </button>
-              <button
-                onClick={nextMethodSlide}
-                disabled={!canSlideNextMethod}
-                className={`hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full shadow-lg items-center justify-center border transition-colors ${
-                  canSlideNextMethod
-                    ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                    : "bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-800 cursor-not-allowed opacity-50"
-                }`}
-              >
-                <ChevronRight
-                  className={`w-5 h-5 ${canSlideNextMethod ? "text-gray-600 dark:text-gray-300" : "text-gray-400 dark:text-gray-600"}`}
-                />
-              </button>
-
-              {/* 学习方法轮播指示器 / Learning method carousel indicators */}
-              <div className="flex justify-center mt-6 space-x-2">
-                {Array.from({
-                  length: Math.ceil(learningSteps.length / 2),
-                }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentMethodSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentMethodSlide
-                        ? "bg-blue-600 dark:bg-blue-400"
-                        : "bg-gray-300 dark:bg-gray-600"
-                    }`}
-                  />
+                  </SwiperSlide>
                 ))}
-              </div>
+              </Swiper>
             </div>
           </div>
         </div>

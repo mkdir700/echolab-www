@@ -442,11 +442,6 @@ export default function DownloadSection() {
           </h2>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8 leading-relaxed">
             选择适合您系统的版本，开始高效的语言学习之旅
-            <br />
-            <span className="text-base text-gray-500 dark:text-gray-400">
-              Choose the right version for your system and start your efficient
-              language learning journey
-            </span>
           </p>
 
           {/* 版本信息 / Version info */}

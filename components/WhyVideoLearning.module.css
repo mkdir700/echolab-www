@@ -1,0 +1,97 @@
+/* Swiper 自定义样式 / Swiper custom styles */
+
+/* 优势轮播样式 / Advantages carousel styles */
+.advantages-swiper {
+  padding-bottom: 40px !important;
+}
+
+.advantages-swiper .swiper-pagination {
+  bottom: 0 !important;
+}
+
+.advantages-swiper .swiper-pagination-bullet {
+  width: 8px !important;
+  height: 8px !important;
+  background: rgb(209, 213, 219) !important; /* gray-300 */
+  opacity: 1 !important;
+  transition: all 0.3s ease !important;
+}
+
+.advantages-swiper .swiper-pagination-bullet-active {
+  background: rgb(37, 99, 235) !important; /* blue-600 */
+  transform: scale(1.2) !important;
+}
+
+/* 深色模式支持 / Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .advantages-swiper .swiper-pagination-bullet {
+    background: rgb(75, 85, 99) !important; /* gray-600 */
+  }
+  
+  .advantages-swiper .swiper-pagination-bullet-active {
+    background: rgb(96, 165, 250) !important; /* blue-400 */
+  }
+}
+
+/* 学习方法轮播样式 / Methods carousel styles */
+.methods-swiper {
+  padding-bottom: 40px !important;
+}
+
+.methods-swiper .swiper-pagination {
+  bottom: 0 !important;
+}
+
+.methods-swiper .swiper-pagination-bullet {
+  width: 8px !important;
+  height: 8px !important;
+  background: rgb(209, 213, 219) !important; /* gray-300 */
+  opacity: 1 !important;
+  transition: all 0.3s ease !important;
+}
+
+.methods-swiper .swiper-pagination-bullet-active {
+  background: rgb(37, 99, 235) !important; /* blue-600 */
+  transform: scale(1.2) !important;
+}
+
+/* 深色模式支持 / Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .methods-swiper .swiper-pagination-bullet {
+    background: rgb(75, 85, 99) !important; /* gray-600 */
+  }
+  
+  .methods-swiper .swiper-pagination-bullet-active {
+    background: rgb(96, 165, 250) !important; /* blue-400 */
+  }
+}
+
+/* 移动端优化 / Mobile optimization */
+@media (max-width: 768px) {
+  .advantages-swiper,
+  .methods-swiper {
+    /* 增强触摸体验 / Enhanced touch experience */
+    touch-action: pan-y pinch-zoom;
+  }
+  
+  .advantages-swiper .swiper-slide,
+  .methods-swiper .swiper-slide {
+    /* 防止意外选择文本 / Prevent accidental text selection */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+}
+
+/* 滑动过渡效果优化 / Slide transition optimization */
+.advantages-swiper .swiper-wrapper,
+.methods-swiper .swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+/* 边界弹性效果 / Boundary elastic effect */
+.advantages-swiper.swiper-container-horizontal > .swiper-wrapper,
+.methods-swiper.swiper-container-horizontal > .swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
