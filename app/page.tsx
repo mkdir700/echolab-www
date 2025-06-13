@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
+import WhyVideoLearning from "../components/WhyVideoLearning";
 import CoreFeatures from "@/components/CoreFeatures";
 import DownloadSection from "@/components/DownloadSection";
 import SupportSection from "@/components/SupportSection";
@@ -13,6 +14,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <Header />
       <HeroSection />
+      <WhyVideoLearning />
       <CoreFeatures />
       <DownloadSection />
       <SupportSection />
