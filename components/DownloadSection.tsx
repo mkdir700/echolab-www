@@ -138,93 +138,6 @@ const getReleaseTypeInfo = (type: ProcessedRelease["releaseType"]) => {
   }
 };
 
-// 后备数据，当 GitHub API 失败时使用
-const fallbackRelease: ProcessedRelease = {
-  version: "v1.0.0",
-  name: "EchoLab v1.0.0",
-  description: "首个稳定版本发布，包含完整的视频播放和字幕功能。",
-  releaseType: "stable",
-  publishedAt: new Date().toISOString(),
-  htmlUrl: "#",
-  platforms: {
-    windows: [
-      {
-        name: "GitHub Release",
-        primary: true,
-        desc: "官方发布渠道",
-        variants: [
-          {
-            arch: "x64",
-            archName: "x64 (推荐)",
-            size: "45.2 MB",
-            url: "#",
-            recommended: true,
-            downloadCount: 1024,
-          },
-          {
-            arch: "arm64",
-            archName: "ARM64",
-            size: "42.8 MB",
-            url: "#",
-            recommended: false,
-            downloadCount: 256,
-          },
-        ],
-      },
-    ],
-    macos: [
-      {
-        name: "GitHub Release",
-        primary: true,
-        desc: "官方发布渠道",
-        variants: [
-          {
-            arch: "apple-silicon",
-            archName: "Apple Silicon (M1/M2/M3)",
-            size: "48.5 MB",
-            url: "#",
-            recommended: true,
-            downloadCount: 512,
-          },
-          {
-            arch: "intel",
-            archName: "Intel x64",
-            size: "52.8 MB",
-            url: "#",
-            recommended: false,
-            downloadCount: 128,
-          },
-        ],
-      },
-    ],
-    linux: [
-      {
-        name: "GitHub Release",
-        primary: true,
-        desc: "官方发布渠道",
-        variants: [
-          {
-            arch: "x64",
-            archName: "x64 (推荐)",
-            size: "48.1 MB",
-            url: "#",
-            recommended: true,
-            downloadCount: 256,
-          },
-          {
-            arch: "arm64",
-            archName: "ARM64",
-            size: "45.3 MB",
-            url: "#",
-            recommended: false,
-            downloadCount: 64,
-          },
-        ],
-      },
-    ],
-  },
-};
-
 export default function DownloadSection({ releaseData }: DownloadSectionProps) {
   const [detectedInfo, setDetectedInfo] = useState<{
     os: string;
@@ -232,9 +145,6 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
   }>({ os: "Unknown", arch: "Unknown" });
   const [activeTab, setActiveTab] = useState<PlatformTab>("windows");
   const [isMounted, setIsMounted] = useState(false);
-
-  // 使用服务端传递的数据或后备数据
-  const currentRelease = releaseData || fallbackRelease;
 
   useEffect(() => {
     // 标记组件已挂载，避免水合错误
@@ -299,15 +209,15 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
             <div className="inline-flex items-center gap-3 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-6 py-4 rounded-2xl border border-orange-200 dark:border-orange-700 mb-8">
               <AlertCircle className="w-6 h-6" />
               <span className="font-semibold">
-                版本信息暂时不可用，使用默认版本信息
+                版本信息暂时不可用，请稍后再试
               </span>
             </div>
             <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-              我们正在使用备用的版本信息，部分下载链接可能暂时不可用
+              无法获取最新版本信息，请稍后刷新页面重试
               <br />
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                We are using backup version information, some download links may
-                be temporarily unavailable
+                Unable to fetch the latest version information, please refresh
+                the page and try again later
               </span>
             </p>
           </div>
@@ -316,9 +226,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
     );
   }
 
-  const finalReleaseData = currentRelease;
-
-  const releaseTypeInfo = getReleaseTypeInfo(finalReleaseData.releaseType);
+  const releaseTypeInfo = getReleaseTypeInfo(releaseData.releaseType);
 
   return (
     <section
@@ -357,7 +265,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                 最新版本：
               </span>
               <span className="text-gray-900 dark:text-white font-bold text-lg">
-                {finalReleaseData.version}
+                {releaseData.version}
               </span>
             </div>
             <motion.div
@@ -458,8 +366,8 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
               if (!currentPlatform) return null;
 
               const platformChannels =
-                finalReleaseData.platforms[
-                  activeTab as keyof typeof finalReleaseData.platforms
+                releaseData.platforms[
+                  activeTab as keyof typeof releaseData.platforms
                 ];
               if (!platformChannels || platformChannels.length === 0) {
                 return (
@@ -622,8 +530,13 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                                 isMounted &&
                                 activeTab.toLowerCase() ===
                                   detectedInfo.os.toLowerCase();
+                              // 修复架构匹配逻辑，支持带后缀的架构名称（如 x64-deb, x64-appimage）
                               const isArchMatch =
-                                isMounted && variant.arch === detectedInfo.arch;
+                                isMounted &&
+                                (variant.arch === detectedInfo.arch ||
+                                  variant.arch.startsWith(
+                                    detectedInfo.arch + "-"
+                                  ));
                               const isRecommended =
                                 isPlatformMatch && isArchMatch;
 
@@ -702,8 +615,10 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                                         </span>
                                         {isMounted &&
                                           isPlatformMatch &&
-                                          variant.arch ===
-                                            detectedInfo.arch && (
+                                          (variant.arch === detectedInfo.arch ||
+                                            variant.arch.startsWith(
+                                              detectedInfo.arch + "-"
+                                            )) && (
                                             <motion.span
                                               className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium"
                                               initial={{ scale: 0 }}
@@ -730,7 +645,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                                       onClick={() =>
                                         handleDownload(
                                           variant.url,
-                                          `EchoLab-${currentRelease.version}-${variant.arch}${currentPlatform.ext}`
+                                          `EchoLab-${releaseData.version}-${variant.arch}${currentPlatform.ext}`
                                         )
                                       }
                                       className={`${

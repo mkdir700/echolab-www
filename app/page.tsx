@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import CoreFeatures from "@/components/CoreFeatures";
@@ -10,60 +7,42 @@ import Footer from "@/components/Footer";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { ProcessedRelease } from "@/lib/api";
 
-// 客户端获取版本信息的函数（直接从 GitHub API 获取）
-// Client-side function to fetch release information (directly from GitHub API)
+// 服务器端获取版本信息的函数
+// Server-side function to fetch release information
 async function getLatestRelease(): Promise<ProcessedRelease | null> {
   try {
-    // 直接从 GitHub API 获取最新版本信息
-    // Fetch latest release directly from GitHub API
-    const response = await fetch(
-      "https://api.github.com/repos/echolab/echolab-app/releases/latest",
-      {
-        headers: {
-          Accept: "application/vnd.github.v3+json",
-          "User-Agent": "EchoLab-Website",
-        },
-      }
-    );
+    // 从我们的 API 路由获取数据
+    // Fetch data from our API route
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NODE_ENV === 'development'
+        ? 'http://localhost:3000'
+        : 'https://echolab-www.vercel.app';
+
+    const response = await fetch(`${baseUrl}/api/releases/latest`, {
+      // 在服务器端缓存 5 分钟
+      next: { revalidate: 300 }
+    });
 
     if (!response.ok) {
-      console.error("Failed to fetch release data:", response.statusText);
+      console.error("Failed to fetch release data from API:", response.statusText);
       return null;
     }
 
-    const release = await response.json();
-
-    // 简单处理 GitHub 数据为我们需要的格式
-    // Simple processing of GitHub data to our required format
-    return {
-      version: release.tag_name,
-      name: release.name || release.tag_name,
-      description: release.body || "",
-      releaseType: release.prerelease ? "beta" : "stable",
-      publishedAt: release.published_at,
-      htmlUrl: release.html_url,
-      platforms: {
-        windows: [],
-        macos: [],
-        linux: [],
-      },
-    };
+    const releaseData = await response.json();
+    return releaseData;
   } catch (error) {
     console.error("Error fetching release data:", error);
     return null;
   }
 }
 
-export default function HomePage() {
-  // 版本信息状态管理
-  // State management for release information
-  const [releaseData, setReleaseData] = useState<ProcessedRelease | null>(null);
-
-  // 组件挂载时获取版本信息
-  // Fetch release information when component mounts
-  useEffect(() => {
-    getLatestRelease().then(setReleaseData);
-  }, []);
+// 服务器端组件 - 在构建时或请求时获取数据
+// Server component - fetch data at build time or request time
+export default async function HomePage() {
+  // 在服务器端获取版本信息
+  // Fetch release information on the server side
+  const releaseData = await getLatestRelease();
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -75,7 +54,7 @@ export default function HomePage() {
       <Footer />
 
       {/* 返回顶部按钮 / Scroll to top button */}
-      <ScrollToTopButton threshold={300} />
+      <ScrollToTopButton />
     </div>
   );
 }
