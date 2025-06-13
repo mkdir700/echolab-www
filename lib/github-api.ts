@@ -4,14 +4,23 @@ import { ProcessedRelease, GitHubAsset, GitHubRelease, determineReleaseType } fr
 // Function to fetch latest release information from GitHub API
 export async function getLatestReleaseFromGitHub(): Promise<ProcessedRelease | null> {
   try {
-    // 先尝试获取最新的正式版本
-    // First try to get the latest stable release
-    let response = await fetch(
-      "https://api.github.com/repos/mkdir700/echolab/releases/latest",
+    console.log("Fetching release data from GitHub API...");
+
+    // 直接获取所有版本中的第一个（包括预发布版本）
+    // Directly get the first release (including pre-releases)
+    // 因为当前仓库只有预发布版本，/releases/latest 会返回 404
+    // Since the current repo only has pre-release versions, /releases/latest returns 404
+    const response = await fetch(
+      "https://api.github.com/repos/mkdir700/echolab/releases?per_page=1",
       {
         headers: {
           Accept: "application/vnd.github.v3+json",
           "User-Agent": "EchoLab-Website",
+          // 添加 GitHub Token 如果可用，提高 API 限制
+          // Add GitHub Token if available to increase API limits
+          ...(process.env.GITHUB_TOKEN && {
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          }),
         },
         // 添加缓存控制
         // Add cache control
@@ -19,38 +28,25 @@ export async function getLatestReleaseFromGitHub(): Promise<ProcessedRelease | n
       }
     );
 
-    // 声明 release 变量 / Declare release variable
-    let release: GitHubRelease;
-
-    // 如果没有正式版本，获取所有版本中的第一个（包括预发布版本）
-    // If no stable release found, get the first release (including pre-releases)
     if (!response.ok) {
-      console.log("No stable release found, trying to get the most recent release...");
-      response = await fetch(
-        "https://api.github.com/repos/mkdir700/echolab/releases?per_page=1",
-        {
-          headers: {
-            Accept: "application/vnd.github.v3+json",
-            "User-Agent": "EchoLab-Website",
-          },
-          next: { revalidate: 300 },
-        }
-      );
+      console.error("Failed to fetch release data:", response.status, response.statusText);
+      return null;
+    }
 
-      if (!response.ok) {
-        console.error("Failed to fetch release data:", response.statusText);
-        return null;
-      }
+    const releases: GitHubRelease[] = await response.json();
+    if (!releases || releases.length === 0) {
+      console.error("No releases found in the repository");
+      return null;
+    }
 
-      const releases: GitHubRelease[] = await response.json();
-      if (!releases || releases.length === 0) {
-        console.error("No releases found");
-        return null;
-      }
+    const release = releases[0];
+    console.log(`Found release: ${release.tag_name} (prerelease: ${release.prerelease})`);
 
-      release = releases[0];
-    } else {
-      release = await response.json();
+    // 验证 release 数据的完整性
+    // Validate release data integrity
+    if (!release.tag_name || !release.assets) {
+      console.error("Invalid release data structure");
+      return null;
     }
 
     // 初始化平台数据结构
@@ -192,7 +188,7 @@ export async function getLatestReleaseFromGitHub(): Promise<ProcessedRelease | n
       }
     }
 
-    return {
+    const processedRelease = {
       version: release.tag_name,
       name: release.name || release.tag_name,
       description: release.body || "",
@@ -201,8 +197,19 @@ export async function getLatestReleaseFromGitHub(): Promise<ProcessedRelease | n
       htmlUrl: release.html_url,
       platforms,
     };
+
+    console.log(`Successfully processed release data for ${processedRelease.version}`);
+    console.log(`Platforms available: ${Object.keys(platforms).filter(key => platforms[key as keyof typeof platforms].length > 0).join(', ')}`);
+
+    return processedRelease;
   } catch (error) {
     console.error("Error fetching release data from GitHub:", error);
+    // 提供更详细的错误信息
+    // Provide more detailed error information
+    if (error instanceof Error) {
+      console.error("Error details:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     return null;
   }
 }
