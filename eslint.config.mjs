@@ -11,6 +11,12 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      // 静态导出时允许使用 img 标签 / Allow img tags for static export
+      "@next/next/no-img-element": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -10,19 +10,44 @@ import Footer from "@/components/Footer";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { ProcessedRelease } from "@/lib/api";
 
-// 客户端获取版本信息的函数
-// Client-side function to fetch release information
+// 客户端获取版本信息的函数（直接从 GitHub API 获取）
+// Client-side function to fetch release information (directly from GitHub API)
 async function getLatestRelease(): Promise<ProcessedRelease | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const response = await fetch(`${baseUrl}/api/releases/latest`);
+    // 直接从 GitHub API 获取最新版本信息
+    // Fetch latest release directly from GitHub API
+    const response = await fetch(
+      "https://api.github.com/repos/echolab/echolab-app/releases/latest",
+      {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+          "User-Agent": "EchoLab-Website",
+        },
+      }
+    );
 
     if (!response.ok) {
       console.error("Failed to fetch release data:", response.statusText);
       return null;
     }
 
-    return await response.json();
+    const release = await response.json();
+
+    // 简单处理 GitHub 数据为我们需要的格式
+    // Simple processing of GitHub data to our required format
+    return {
+      version: release.tag_name,
+      name: release.name || release.tag_name,
+      description: release.body || "",
+      releaseType: release.prerelease ? "beta" : "stable",
+      publishedAt: release.published_at,
+      htmlUrl: release.html_url,
+      platforms: {
+        windows: [],
+        macos: [],
+        linux: [],
+      },
+    };
   } catch (error) {
     console.error("Error fetching release data:", error);
     return null;
@@ -41,7 +66,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <Header />
       <HeroSection />
       <CoreFeatures />

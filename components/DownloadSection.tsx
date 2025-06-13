@@ -6,7 +6,7 @@ import {
   Monitor,
   Apple,
   Smartphone,
-  Github,
+  GitBranch,
   LucideIcon,
   Cpu,
   Zap,
@@ -231,11 +231,16 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
     arch: string;
   }>({ os: "Unknown", arch: "Unknown" });
   const [activeTab, setActiveTab] = useState<PlatformTab>("windows");
+  const [isMounted, setIsMounted] = useState(false);
 
   // 使用服务端传递的数据或后备数据
   const currentRelease = releaseData || fallbackRelease;
 
   useEffect(() => {
+    // 标记组件已挂载，避免水合错误
+    // Mark component as mounted to avoid hydration errors
+    setIsMounted(true);
+
     const info = detectOSAndArch();
     setDetectedInfo(info);
 
@@ -284,23 +289,23 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
     return (
       <section
         id="download"
-        className="py-20 lg:py-32 px-6 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 overflow-hidden"
+        className="py-20 lg:py-32 px-6 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 overflow-hidden"
       >
         <div className="container mx-auto max-w-6xl">
           <div className="text-center">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-gray-100 dark:via-blue-300 dark:to-gray-100 bg-clip-text text-transparent">
               立即下载 EchoLab
             </h2>
-            <div className="inline-flex items-center gap-3 bg-orange-50 text-orange-700 px-6 py-4 rounded-2xl border border-orange-200 mb-8">
+            <div className="inline-flex items-center gap-3 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-6 py-4 rounded-2xl border border-orange-200 dark:border-orange-700 mb-8">
               <AlertCircle className="w-6 h-6" />
               <span className="font-semibold">
                 版本信息暂时不可用，使用默认版本信息
               </span>
             </div>
-            <p className="text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
               我们正在使用备用的版本信息，部分下载链接可能暂时不可用
               <br />
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 We are using backup version information, some download links may
                 be temporarily unavailable
               </span>
@@ -318,7 +323,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
   return (
     <section
       id="download"
-      className="py-20 lg:py-32 px-6 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 overflow-hidden"
+      className="py-20 lg:py-32 px-6 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 overflow-hidden"
     >
       <div className="container mx-auto max-w-6xl">
         {/* 头部标题 / Header title */}
@@ -328,13 +333,13 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 bg-clip-text text-transparent">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-gray-100 dark:via-blue-300 dark:to-gray-100 bg-clip-text text-transparent">
             立即下载 EchoLab
           </h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8 leading-relaxed">
             选择适合您系统的版本，开始高效的语言学习之旅
             <br />
-            <span className="text-base text-gray-500">
+            <span className="text-base text-gray-500 dark:text-gray-400">
               Choose the right version for your system and start your efficient
               language learning journey
             </span>
@@ -342,14 +347,16 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
 
           {/* 版本信息 / Version info */}
           <motion.div
-            className="inline-flex items-center gap-4 bg-white/80 backdrop-blur-xl rounded-2xl px-6 py-4 shadow-lg shadow-gray-900/5 border border-gray-200/50"
+            className="inline-flex items-center gap-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl px-6 py-4 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20 border border-gray-200/50 dark:border-gray-700/50"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 font-medium">最新版本：</span>
-              <span className="text-gray-900 font-bold text-lg">
+              <span className="text-gray-500 dark:text-gray-400 font-medium">
+                最新版本：
+              </span>
+              <span className="text-gray-900 dark:text-white font-bold text-lg">
                 {finalReleaseData.version}
               </span>
             </div>
@@ -376,10 +383,10 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <div className="flex justify-center mb-8">
-            <div className="relative inline-flex bg-white/80 backdrop-blur-xl p-1.5 rounded-[1.25rem] shadow-lg shadow-gray-900/5 border border-gray-200/50">
+            <div className="relative inline-flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-1.5 rounded-[1.25rem] shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20 border border-gray-200/50 dark:border-gray-700/50">
               {/* 动画背景滑块 / Animated background slider */}
               <motion.div
-                className="absolute bg-blue-600 rounded-xl shadow-lg shadow-blue-600/20"
+                className="absolute bg-blue-600 dark:bg-blue-500 rounded-xl shadow-lg shadow-blue-600/20 dark:shadow-blue-500/20"
                 layoutId="activeTab"
                 transition={{
                   type: "spring",
@@ -397,7 +404,10 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
               {platforms.map((platform) => {
                 const tabId = platform.id as PlatformTab;
                 const isActive = activeTab === tabId;
+                // 只有在客户端挂载后才显示检测到的系统指示器
+                // Only show detected system indicator after client mount
                 const isDetected =
+                  isMounted &&
                   platform.id.toLowerCase() === detectedInfo.os.toLowerCase();
 
                 return (
@@ -407,7 +417,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                     className={`relative flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 font-semibold z-10 ${
                       isActive
                         ? "text-white"
-                        : "text-gray-600 hover:text-gray-900"
+                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                     }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -461,16 +471,16 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-[2rem] p-12 shadow-lg shadow-gray-900/5">
-                      <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-6" />
-                      <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-[2rem] p-12 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20">
+                      <AlertCircle className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                         暂无下载文件
                       </h3>
-                      <p className="text-gray-600 leading-relaxed">
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                         {currentPlatform.title}{" "}
                         平台的版本正在准备中，请稍后再试或选择其他平台
                         <br />
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
                           The version for {currentPlatform.title} platform is
                           being prepared
                         </span>
@@ -494,7 +504,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                 >
                   {/* 平台信息卡片 / Platform info card */}
                   <motion.div
-                    className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-[2rem] p-8 lg:p-10 mb-8 shadow-lg shadow-gray-900/5"
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-[2rem] p-8 lg:p-10 mb-8 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20"
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.4, delay: 0.1 }}
@@ -506,7 +516,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                       transition={{ duration: 0.4, delay: 0.2 }}
                     >
                       <motion.div
-                        className="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-blue-500/10"
+                        className="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-blue-500/10 dark:shadow-blue-500/20"
                         whileHover={{ scale: 1.05 }}
                         transition={{
                           duration: 0.2,
@@ -514,11 +524,11 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                           stiffness: 300,
                         }}
                       >
-                        <currentPlatform.icon className="w-10 h-10 text-blue-600" />
+                        <currentPlatform.icon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
                       </motion.div>
                       <div className="flex-1">
                         <motion.h3
-                          className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2"
+                          className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2"
                           initial={{ x: -20, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ duration: 0.4, delay: 0.3 }}
@@ -526,7 +536,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                           {currentPlatform.title}
                         </motion.h3>
                         <motion.p
-                          className="text-gray-600 text-lg mb-1"
+                          className="text-gray-600 dark:text-gray-300 text-lg mb-1"
                           initial={{ x: -20, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ duration: 0.4, delay: 0.4 }}
@@ -534,7 +544,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                           {currentPlatform.desc}
                         </motion.p>
                         <motion.p
-                          className="text-sm text-gray-500"
+                          className="text-sm text-gray-500 dark:text-gray-400"
                           initial={{ x: -20, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ duration: 0.4, delay: 0.5 }}
@@ -555,7 +565,7 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                       {platformChannels.map((channel, channelIdx) => (
                         <motion.div
                           key={channelIdx}
-                          className="bg-gray-50/80 border border-gray-200/50 rounded-[1.5rem] p-6 lg:p-8"
+                          className="bg-gray-50/80 dark:bg-gray-700/50 border border-gray-200/50 dark:border-gray-600/50 rounded-[1.5rem] p-6 lg:p-8"
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{
@@ -573,23 +583,23 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                             }}
                           >
                             <motion.div
-                              className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm"
+                              className="w-12 h-12 bg-white dark:bg-gray-600 rounded-xl flex items-center justify-center shadow-sm"
                               whileHover={{ scale: 1.05 }}
                               transition={{ duration: 0.2 }}
                             >
-                              <Github className="w-6 h-6 text-gray-700" />
+                              <GitBranch className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                             </motion.div>
                             <div className="flex-1">
-                              <h4 className="text-xl font-bold text-gray-900">
+                              <h4 className="text-xl font-bold text-gray-900 dark:text-white">
                                 {channel.name}
                               </h4>
-                              <p className="text-gray-600 text-sm">
+                              <p className="text-gray-600 dark:text-gray-300 text-sm">
                                 {channel.desc}
                               </p>
                             </div>
                             {channel.primary && (
                               <motion.span
-                                className="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-sm font-semibold"
+                                className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-xl text-sm font-semibold"
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{
@@ -606,11 +616,14 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                           <div className="grid gap-3">
                             {channel.variants.map((variant, variantIdx) => {
                               // 只有当前平台和架构都匹配时才推荐 / Only recommend when both platform and architecture match
+                              // 只有在客户端挂载后才进行推荐计算，避免水合错误
+                              // Only calculate recommendations after client mount to avoid hydration errors
                               const isPlatformMatch =
+                                isMounted &&
                                 activeTab.toLowerCase() ===
-                                detectedInfo.os.toLowerCase();
+                                  detectedInfo.os.toLowerCase();
                               const isArchMatch =
-                                variant.arch === detectedInfo.arch;
+                                isMounted && variant.arch === detectedInfo.arch;
                               const isRecommended =
                                 isPlatformMatch && isArchMatch;
 
@@ -619,8 +632,8 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                                   key={variantIdx}
                                   className={`flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-[1.25rem] border transition-all duration-300 ${
                                     isRecommended
-                                      ? "bg-blue-50/80 border-blue-200 shadow-sm"
-                                      : "bg-white/60 border-gray-200/60 hover:bg-white/80 hover:border-gray-300/60"
+                                      ? "bg-blue-50/80 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 shadow-sm"
+                                      : "bg-white/60 dark:bg-gray-700/40 border-gray-200/60 dark:border-gray-600/60 hover:bg-white/80 dark:hover:bg-gray-700/60 hover:border-gray-300/60 dark:hover:border-gray-500/60"
                                   }`}
                                   initial={{
                                     y: 20,
@@ -645,8 +658,8 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                                     <motion.div
                                       className={`w-14 h-14 rounded-xl flex items-center justify-center ${
                                         isRecommended
-                                          ? "bg-blue-100 shadow-sm"
-                                          : "bg-gray-100"
+                                          ? "bg-blue-100 dark:bg-blue-900/30 shadow-sm"
+                                          : "bg-gray-100 dark:bg-gray-600"
                                       }`}
                                       whileHover={{
                                         scale: 1.05,
@@ -654,17 +667,17 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                                       }}
                                     >
                                       <Cpu
-                                        className={`w-7 h-7 ${isRecommended ? "text-blue-600" : "text-gray-600"}`}
+                                        className={`w-7 h-7 ${isRecommended ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300"}`}
                                       />
                                     </motion.div>
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-gray-900 font-semibold text-lg">
+                                        <span className="text-gray-900 dark:text-white font-semibold text-lg">
                                           {variant.archName}
                                         </span>
                                         {isRecommended && (
                                           <motion.div
-                                            className="flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg text-xs font-semibold"
+                                            className="flex items-center gap-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded-lg text-xs font-semibold"
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             transition={{
@@ -677,21 +690,22 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                                           </motion.div>
                                         )}
                                       </div>
-                                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
                                         <span className="flex items-center gap-1">
-                                          <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                                          <span className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
                                           文件大小：{variant.size}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                          <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                                          <span className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
                                           下载次数：
                                           {variant.downloadCount.toLocaleString()}
                                         </span>
-                                        {isPlatformMatch &&
+                                        {isMounted &&
+                                          isPlatformMatch &&
                                           variant.arch ===
                                             detectedInfo.arch && (
                                             <motion.span
-                                              className="flex items-center gap-1 text-emerald-600 font-medium"
+                                              className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium"
                                               initial={{ scale: 0 }}
                                               animate={{ scale: 1 }}
                                               transition={{
@@ -721,8 +735,8 @@ export default function DownloadSection({ releaseData }: DownloadSectionProps) {
                                       }
                                       className={`${
                                         isRecommended
-                                          ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25"
-                                          : "bg-gray-700 hover:bg-gray-800 text-white"
+                                          ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                                          : "bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-700 text-white"
                                       } rounded-[1rem] px-6 py-3 font-semibold transition-all duration-300 group border-0`}
                                     >
                                       <motion.div

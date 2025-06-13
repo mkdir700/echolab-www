@@ -1,6 +1,6 @@
 // Custom hooks for data fetching using TanStack Query
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiEndpoints, type SubtitleItem, type SubtitleResponse } from '@/lib/api';
+import { apiEndpoints, type SubtitleItem, type SubtitleResponse } from '@/lib/api'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 // Query keys for consistent cache management
 export const queryKeys = {
@@ -95,12 +95,15 @@ export function useSubtitleMutations() {
     mutationFn: async (newSubtitle: Omit<SubtitleItem, 'id'>): Promise<SubtitleItem> => {
       // In production, this would call the API
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
+      // 使用递增ID生成方式，避免SSR水合错误
+      // Use incremental ID generation to avoid SSR hydration errors
+      const maxId = Math.max(...mockSubtitleData.map(item => item.id), 0);
       const subtitle: SubtitleItem = {
         ...newSubtitle,
-        id: Date.now(), // Simple ID generation for mock
+        id: maxId + 1, // Incremental ID generation for mock
       };
-      
+
       return subtitle;
     },
     onSuccess: () => {
@@ -123,7 +126,7 @@ export function useSubtitleMutations() {
   });
 
   const deleteSubtitle = useMutation({
-    mutationFn: async (id: string): Promise<void> => {
+    mutationFn: async (id: string): Promise<void> => { // eslint-disable-line @typescript-eslint/no-unused-vars
       // In production, this would call the API
       await new Promise(resolve => setTimeout(resolve, 1000));
     },
