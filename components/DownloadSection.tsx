@@ -415,30 +415,57 @@ export default function DownloadSection() {
   const releaseTypeInfo = getReleaseTypeInfo(releaseData.releaseType);
   const recommendedDownload = getRecommendedDownload();
 
-  // 移动端友好提示组件 / Mobile-friendly prompt component
-  const MobilePrompt = () => (
-    <motion.div
-      className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-2xl p-6 mb-8"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
-          <Smartphone className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+  // 移动端心愿单提示组件 / Mobile wishlist prompt component
+  const MobileWishlistPrompt = () => {
+    const handleWishlistClick = () => {
+      // 跳转到腾讯问卷 / Redirect to Tencent survey
+      window.open("https://wj.qq.com/s2/22783147/bad0/", "_blank");
+    };
+
+    return (
+      <motion.div
+        className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-2xl p-6 mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex items-start gap-4 mb-4">
+          <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Smartphone className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
+              EchoLab 目前专注于桌面端体验，移动端版本正在规划中。
+            </p>
+          </div>
         </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            暂不支持移动设备
-          </h3>
-          <p className="text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
-            EchoLab
-            是专为桌面端设计的专业语言学习工具。在电脑上使用能获得更佳的学习体验和更高的学习效率。
-          </p>
-        </div>
-      </div>
-    </motion.div>
-  );
+
+        <Button
+          onClick={handleWishlistClick}
+          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 dark:from-purple-500 dark:to-pink-500 dark:hover:from-purple-600 dark:hover:to-pink-600 text-white rounded-xl py-4 font-semibold text-lg transition-all duration-300 group shadow-lg shadow-purple-600/25"
+        >
+          <motion.div
+            className="flex items-center justify-center gap-3"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              ❤️
+            </motion.div>
+            加入心愿单
+            <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+          </motion.div>
+        </Button>
+
+        <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
+          点击将跳转到问卷页面，帮助我们了解您的需求
+        </p>
+      </motion.div>
+    );
+  };
 
   return (
     <section
@@ -489,11 +516,6 @@ export default function DownloadSection() {
             transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             选择适合您系统的版本，开始高效的语言学习之旅
-            <br />
-            <span className="text-base sm:text-lg text-muted-foreground/70">
-              Choose the right version for your system and start your efficient
-              language learning journey
-            </span>
           </motion.p>
 
           {/* 版本信息卡片 / Version info card */}
@@ -550,8 +572,8 @@ export default function DownloadSection() {
           </motion.div>
         </motion.div>
 
-        {/* 移动端提示 / Mobile prompt */}
-        {isMounted && detectedInfo.isMobile && <MobilePrompt />}
+        {/* 移动端心愿单提示 / Mobile wishlist prompt */}
+        {isMounted && detectedInfo.isMobile && <MobileWishlistPrompt />}
 
         {/* 智能推荐下载区域 / Smart recommended download area */}
         {recommendedDownload && isMounted && !detectedInfo.isMobile && (
@@ -642,7 +664,7 @@ export default function DownloadSection() {
                 ) : (
                   <>
                     <ChevronDown className="w-4 h-4" />
-                    查看所有平台选项
+                    查看其他平台选项
                   </>
                 )}
               </motion.div>
