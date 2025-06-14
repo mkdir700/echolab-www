@@ -37,21 +37,32 @@ const detectDeviceType = (): DeviceType => {
   const maxDimension = Math.max(screenWidth, screenHeight);
   const minDimension = Math.min(screenWidth, screenHeight);
 
-  // 检测移动设备 / Detect mobile devices
+  // 首先检测是否为桌面操作系统 / First check if it's a desktop OS
+  const isDesktopOS =
+    /Windows|Mac|Linux/i.test(userAgent) &&
+    !/Mobile|Android|iPhone|iPad|iPod/i.test(userAgent);
+
+  // 如果是桌面操作系统且屏幕尺寸较大，直接返回桌面 / If desktop OS with large screen, return desktop
+  if (isDesktopOS && minDimension > 1024) {
+    return "desktop";
+  }
+
+  // 检测真正的移动设备 / Detect actual mobile devices
   const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    /Android.*Mobile|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       userAgent
-    ) ||
-    (maxDimension <= 768 && minDimension <= 1024);
+    );
 
   // 检测平板设备 / Detect tablet devices
-  const isTablet =
-    (/iPad|Android/i.test(userAgent) &&
-      maxDimension >= 768 &&
-      maxDimension <= 1024) ||
-    (minDimension >= 768 && minDimension <= 1024);
+  const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent);
 
-  if (isMobile && !isTablet) return "mobile";
+  // 基于屏幕尺寸的备用检测 / Fallback detection based on screen size
+  if (!isMobile && !isTablet && !isDesktopOS) {
+    if (maxDimension <= 768) return "mobile";
+    if (maxDimension <= 1024) return "tablet";
+  }
+
+  if (isMobile) return "mobile";
   if (isTablet) return "tablet";
   return "desktop";
 };
@@ -69,7 +80,7 @@ const detectOSAndArch = () => {
   const userAgent = window.navigator.userAgent;
   const platform = window.navigator.platform;
   const deviceType = detectDeviceType();
-  const isMobile = deviceType === "mobile" || deviceType === "tablet";
+  const isMobile = deviceType === "mobile"; // 只有真正的移动设备才算移动端 / Only actual mobile devices count as mobile
 
   let os = "Unknown";
   let arch = "Unknown";
@@ -244,6 +255,16 @@ export default function DownloadSection() {
 
     const info = detectOSAndArch();
     setDetectedInfo(info);
+
+    // 调试信息 / Debug information
+    console.log("设备检测结果 / Device detection result:", {
+      userAgent: navigator.userAgent,
+      os: info.os,
+      arch: info.arch,
+      deviceType: info.deviceType,
+      isMobile: info.isMobile,
+      screenSize: `${window.screen.width}x${window.screen.height}`,
+    });
 
     // 根据检测到的系统自动设置activeTab
     // Auto-set activeTab based on detected system
