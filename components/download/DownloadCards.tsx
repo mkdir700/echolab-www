@@ -53,7 +53,7 @@ export function DownloadCards({
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="bg-white/90 dark:bg-gray-800/90 rounded-2xl p-12">
+        <div className="bg-white/95 dark:bg-gray-800/90 rounded-2xl p-12 border border-gray-200/60 dark:border-gray-700/50 shadow-lg shadow-black/5 dark:shadow-black/20">
           <AlertCircle className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             暂无下载文件
@@ -85,7 +85,7 @@ export function DownloadCards({
     >
       {/* 平台信息卡片 */}
       <motion.div
-        className="bg-white/90 dark:bg-gray-800/90 rounded-2xl p-8 lg:p-10 mb-8"
+        className="bg-white/95 dark:bg-gray-800/90 rounded-2xl p-8 lg:p-10 mb-8 border border-gray-200/60 dark:border-gray-700/50 shadow-lg shadow-black/5 dark:shadow-black/20"
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.1 }}
