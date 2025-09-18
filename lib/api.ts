@@ -89,6 +89,7 @@ export interface GitHubRelease {
 export interface ReleaseVariant {
   arch: string;
   archName: string;
+  packageType?: 'setup' | 'portable';
   size: string;
   url: string;
   recommended?: boolean;
@@ -226,31 +227,36 @@ export function isExecutableFile(filename: string): boolean {
 export function detectPlatformFromFilename(filename: string): {
   platform: 'windows' | 'macos' | 'linux' | null;
   arch: string;
+  packageType?: 'setup' | 'portable';
 } {
   const lower = filename.toLowerCase();
-  
+
   // Platform detection - 改进平台检测逻辑
   let platform: 'windows' | 'macos' | 'linux' | null = null;
-  
+  let packageType: 'setup' | 'portable' | undefined = undefined;
+
   // Windows 检测
-  if (lower.includes('.exe') || lower.includes('windows') || lower.includes('win') || lower.includes('setup')) {
+  if (lower.includes('.exe') || lower.includes('windows') || lower.includes('win') || lower.includes('setup') || lower.includes('portable')) {
     platform = 'windows';
-  } 
+    // 检测包类型
+    if (lower.includes('portable')) {
+      packageType = 'portable';
+    } else if (lower.includes('.exe') && (lower.includes('setup') || lower.includes('-setup.'))) {
+      packageType = 'setup';
+    } else if (lower.includes('.exe')) {
+      // 默认 exe 文件为安装包
+      packageType = 'setup';
+    }
+  }
   // macOS 检测
   else if (lower.includes('.dmg') || lower.includes('macos') || lower.includes('darwin') || lower.includes('mac.yml')) {
     platform = 'macos';
-  } 
+  }
   // Linux 检测
   else if (lower.includes('.appimage') || lower.includes('linux') || lower.includes('.deb') || lower.includes('.rpm') || lower.includes('.tar.gz')) {
     platform = 'linux';
   }
-  // 特殊情况：zip 文件需要根据架构推断
-  else if (lower.includes('.zip') && !lower.includes('.blockmap')) {
-    // 如果是 arm64 或 x64 的 zip 文件，通常是 Windows 的便携版
-    if (lower.includes('arm64') || lower.includes('x64') || lower.includes('amd64')) {
-      platform = 'windows';
-    }
-  }
+  // 不再处理普通的 zip 文件，只处理明确标注为 portable 的文件
   
   // Architecture detection - 改进架构检测逻辑
   let arch = 'unknown';
@@ -277,7 +283,7 @@ export function detectPlatformFromFilename(filename: string): {
     arch = 'x64';
   }
   
-  return { platform, arch };
+  return { platform, arch, packageType };
 }
 
 export default api;
