@@ -53,7 +53,7 @@ export function DownloadCards({
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-[2rem] p-12 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20">
+        <div className="bg-white/90 dark:bg-gray-800/90 rounded-2xl p-12">
           <AlertCircle className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             暂无下载文件
@@ -85,7 +85,7 @@ export function DownloadCards({
     >
       {/* 平台信息卡片 */}
       <motion.div
-        className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-[2rem] p-8 lg:p-10 mb-8 shadow-lg shadow-gray-900/5 dark:shadow-gray-900/20"
+        className="bg-white/90 dark:bg-gray-800/90 rounded-2xl p-8 lg:p-10 mb-8"
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.1 }}
@@ -146,7 +146,7 @@ export function DownloadCards({
           {platformChannels.map((channel, channelIdx) => (
             <motion.div
               key={channelIdx}
-              className="bg-gray-50/80 dark:bg-gray-700/50 border border-gray-200/50 dark:border-gray-600/50 rounded-[1.5rem] p-6 lg:p-8"
+              className="p-6 lg:p-8 mb-6 last:mb-0"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{
@@ -164,7 +164,7 @@ export function DownloadCards({
                 }}
               >
                 <motion.div
-                  className="w-12 h-12 bg-white dark:bg-gray-600 rounded-xl flex items-center justify-center shadow-sm"
+                  className="w-12 h-12 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center"
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -216,10 +216,10 @@ export function DownloadCards({
                   return (
                     <motion.div
                       key={variantIdx}
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-[1.25rem] border transition-all duration-300 ${
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-xl transition-all duration-300 ${
                         isRecommended
-                          ? "bg-blue-50/80 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 shadow-sm"
-                          : "bg-white/60 dark:bg-gray-700/40 border-gray-200/60 dark:border-gray-600/60 hover:bg-white/80 dark:hover:bg-gray-700/60 hover:border-gray-300/60 dark:hover:border-gray-500/60"
+                          ? "bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700"
+                          : "bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/70"
                       }`}
                       initial={{
                         y: 20,
@@ -242,9 +242,9 @@ export function DownloadCards({
                     >
                       <div className="flex items-center gap-4 mb-4 sm:mb-0">
                         <motion.div
-                          className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+                          className={`w-14 h-14 rounded-lg flex items-center justify-center ${
                             isRecommended
-                              ? "bg-blue-100 dark:bg-blue-900/30 shadow-sm"
+                              ? "bg-blue-100 dark:bg-blue-800/50"
                               : "bg-gray-100 dark:bg-gray-600"
                           }`}
                           whileHover={{
@@ -358,12 +358,12 @@ export function DownloadCards({
                           className={`${
                             isRecommended
                               ? variant.packageType === 'setup'
-                                ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25"
-                                : "bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white shadow-lg shadow-purple-600/25"
+                                ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                                : "bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
                               : variant.packageType === 'portable'
                               ? "bg-purple-700 hover:bg-purple-800 dark:bg-purple-600 dark:hover:bg-purple-700 text-white"
                               : "bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-700 text-white"
-                          } rounded-[1rem] px-6 py-3 font-semibold transition-all duration-300 group border-0`}
+                          } rounded-lg px-6 py-3 font-semibold transition-all duration-300 group border-0`}
                         >
                           <motion.div
                             className="flex items-center gap-2"
