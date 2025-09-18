@@ -22,7 +22,7 @@ export async function getLatestReleaseFromChinaApi(): Promise<ProcessedRelease |
   try {
     console.log('Fetching release data from China API...');
     
-    const response = await fetch('http://release.echoplayer.z2blog.com/api/alpha/releases', {
+    const response = await fetch('http://release.echoplayer.z2blog.com/api/releases', {
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'EchoLab-Website',
@@ -43,8 +43,6 @@ export async function getLatestReleaseFromChinaApi(): Promise<ProcessedRelease |
       console.error('No release data from China API');
       return null;
     }
-
-    console.log('Successfully fetched release from China API:', release.version);
 
     // 初始化平台数据结构
     // Initialize platform data structure
