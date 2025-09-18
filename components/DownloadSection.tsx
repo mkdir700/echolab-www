@@ -2,9 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProcessedRelease } from "@/lib/api";
+import { getLatestReleaseFromGitHub } from "@/lib/github-api";
+import { getLatestReleaseFromChinaApi } from "@/lib/china-api";
 import { VersionHeader } from "./download/VersionHeader";
 import {
   PlatformSelector,
@@ -15,10 +17,18 @@ import { DownloadCards } from "./download/DownloadCards";
 import { RecommendedDownload } from "./download/RecommendedDownload";
 import { MobileWishlistPrompt } from "./download/MobileWishlistPrompt";
 import { useDeviceDetection } from "@/hooks/useDeviceDetection";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 export default function DownloadSection() {
   // 使用设备检测Hook
   const { detectedInfo, isMounted } = useDeviceDetection();
+
+  // 使用用户位置检测Hook
+  const {
+    location: userLocation,
+    loading: locationLoading,
+    error: locationError,
+  } = useUserLocation();
 
   // 状态管理
   const [activeTab, setActiveTab] = useState<PlatformTab>("windows");
@@ -27,48 +37,62 @@ export default function DownloadSection() {
   const [error, setError] = useState<string | null>(null);
   const [showAllPlatforms, setShowAllPlatforms] = useState(false);
 
-  // 客户端获取版本信息的函数（支持地理位置感知）
-  const fetchReleaseData = async () => {
+  // 客户端获取版本信息的函数（直接使用客户端网络）
+  const fetchReleaseData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // 使用地理位置感知的API端点
-      const response = await fetch("/api/releases/latest-geo", {
-        // 使用默认的缓存策略，允许浏览器缓存
-        cache: "default",
-        headers: {
-          // 添加 Accept 头
-          Accept: "application/json",
-        },
-      });
+      let releaseData: ProcessedRelease | null = null;
+      let dataSource = "github"; // 默认数据源
 
-      if (!response.ok) {
-        throw new Error(`获取版本信息失败: ${response.statusText}`);
+      // 根据客户端检测到的地理位置选择API
+      // 如果地理位置检测失败，默认使用GitHub API
+      if (userLocation?.isChina && !locationError) {
+        // 中国用户优先使用中国API
+        try {
+          console.log("🇨🇳 检测到中国用户，使用中国镜像源获取版本信息");
+          releaseData = await getLatestReleaseFromChinaApi();
+          dataSource = "china";
+
+          if (!releaseData) {
+            console.log("中国API失败，回退到GitHub API");
+            releaseData = await getLatestReleaseFromGitHub();
+            dataSource = "github";
+          }
+        } catch (error) {
+          console.warn("中国API调用失败，使用GitHub API:", error);
+          releaseData = await getLatestReleaseFromGitHub();
+          dataSource = "github";
+        }
+      } else {
+        // 非中国用户或地理位置检测失败时使用GitHub API
+        if (locationError) {
+          console.log("地理位置检测失败，使用GitHub API获取版本信息");
+        } else {
+          console.log("检测到非中国用户，使用GitHub API获取版本信息");
+        }
+        releaseData = await getLatestReleaseFromGitHub();
+        dataSource = "github";
       }
 
-      const data = await response.json();
-      setReleaseData(data);
+      if (!releaseData) {
+        throw new Error("所有数据源都无法获取版本信息");
+      }
 
-      // 记录缓存状态和数据源（用于调试）
-      const cacheStatus = response.headers.get("X-Cache");
-      const geoSource = response.headers.get("X-Geo-Source");
-      const geoCountry = response.headers.get("X-Geo-Country");
+      setReleaseData(releaseData);
 
       console.log(`版本信息获取成功 / Release data fetched successfully:`, {
-        version: data.version,
-        cacheStatus: cacheStatus,
-        dataSource: geoSource,
-        detectedCountry: geoCountry,
+        version: releaseData.version,
+        dataSource: dataSource,
+        detectedCountry: userLocation?.countryCode || "Unknown",
+        isChina: userLocation?.isChina || false,
       });
 
       // 如果使用的是中国API，在控制台显示提示
-      if (geoSource === "china") {
+      if (dataSource === "china") {
         console.log(
-          "🇨🇳 检测到中国用户，使用中国镜像源获取版本信息以提供更快的下载速度"
-        );
-        console.log(
-          "🇨🇳 China user detected, using China mirror for faster download speeds"
+          "🇨🇳 使用中国镜像源，下载速度更快 / Using China mirror for faster download speeds"
         );
       }
     } catch (err) {
@@ -79,7 +103,7 @@ export default function DownloadSection() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userLocation?.isChina, userLocation?.countryCode, locationError]);
 
   useEffect(() => {
     // 根据检测到的系统自动设置activeTab
@@ -92,10 +116,15 @@ export default function DownloadSection() {
         setActiveTab("linux");
       }
     }
-
-    // 获取版本信息
-    fetchReleaseData();
   }, [isMounted, detectedInfo.os]);
+
+  // 单独的useEffect处理版本信息获取，等待地理位置检测完成
+  useEffect(() => {
+    // 只有当地理位置检测完成（不管成功还是失败）且已挂载时才获取版本信息
+    if (isMounted && !locationLoading) {
+      fetchReleaseData();
+    }
+  }, [isMounted, locationLoading, fetchReleaseData]);
 
   // 使用默认平台配置
   const platforms = defaultPlatforms;
@@ -106,8 +135,8 @@ export default function DownloadSection() {
     window.open(url, "_blank");
   };
 
-  // 如果正在加载，显示加载状态
-  if (isLoading) {
+  // 如果正在加载（地理位置检测或版本信息获取），显示加载状态
+  if (isLoading || locationLoading) {
     return (
       <section
         id="download"
@@ -128,15 +157,32 @@ export default function DownloadSection() {
             </h2>
             <div className="inline-flex items-center gap-3 bg-card/90 dark:bg-card/90 backdrop-blur-xl text-blue-700 dark:text-blue-300 px-6 py-4 rounded-2xl border border-blue-200/50 dark:border-blue-700/50 mb-8 shadow-lg">
               <Loader2 className="w-6 h-6 animate-spin" />
-              <span className="font-semibold">正在获取最新版本信息...</span>
+              <span className="font-semibold">
+                {locationLoading
+                  ? "正在检测您的位置..."
+                  : "正在获取最新版本信息..."}
+              </span>
             </div>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-              请稍等，我们正在为您获取最新的版本信息
-              <br />
-              <span className="text-sm text-muted-foreground/70">
-                Please wait while we fetch the latest version information for
-                you
-              </span>
+              {locationLoading ? (
+                <>
+                  正在检测您的网络位置以选择最优的下载源
+                  <br />
+                  <span className="text-sm text-muted-foreground/70">
+                    Detecting your network location to select the optimal
+                    download source
+                  </span>
+                </>
+              ) : (
+                <>
+                  请稍等，我们正在为您获取最新的版本信息
+                  <br />
+                  <span className="text-sm text-muted-foreground/70">
+                    Please wait while we fetch the latest version information
+                    for you
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -145,7 +191,7 @@ export default function DownloadSection() {
   }
 
   // 如果数据获取失败，显示错误状态
-  if (error || !releaseData) {
+  if (error || (!releaseData && !isLoading && !locationLoading)) {
     return (
       <section
         id="download"
@@ -217,20 +263,22 @@ export default function DownloadSection() {
 
       <div className="container mx-auto max-w-6xl relative z-10">
         {/* 版本头部 */}
-        <VersionHeader releaseData={releaseData} />
+        {releaseData && <VersionHeader releaseData={releaseData} />}
 
         {/* 移动端心愿单提示 */}
         <MobileWishlistPrompt isVisible={isMounted && detectedInfo.isMobile} />
 
         {/* 智能推荐下载区域 */}
-        <RecommendedDownload
-          releaseData={releaseData}
-          platforms={platforms}
-          activeTab={activeTab}
-          detectedInfo={detectedInfo}
-          isMounted={isMounted}
-          onDownload={handleDownload}
-        />
+        {releaseData && (
+          <RecommendedDownload
+            releaseData={releaseData}
+            platforms={platforms}
+            activeTab={activeTab}
+            detectedInfo={detectedInfo}
+            isMounted={isMounted}
+            onDownload={handleDownload}
+          />
+        )}
 
         {/* 其他平台选项 */}
         <motion.div
@@ -295,14 +343,16 @@ export default function DownloadSection() {
 
                 {/* 当前选中平台的下载内容 */}
                 <AnimatePresence mode="wait">
-                  <DownloadCards
-                    releaseData={releaseData}
-                    platforms={platforms}
-                    activeTab={activeTab}
-                    detectedInfo={detectedInfo}
-                    isMounted={isMounted}
-                    onDownload={handleDownload}
-                  />
+                  {releaseData && (
+                    <DownloadCards
+                      releaseData={releaseData}
+                      platforms={platforms}
+                      activeTab={activeTab}
+                      detectedInfo={detectedInfo}
+                      isMounted={isMounted}
+                      onDownload={handleDownload}
+                    />
+                  )}
                 </AnimatePresence>
               </motion.div>
             )}
