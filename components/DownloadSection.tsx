@@ -280,84 +280,86 @@ export default function DownloadSection() {
           />
         )}
 
-        {/* 其他平台选项 */}
-        <motion.div
-          className="mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <div className="text-center mb-6">
-            <Button
-              onClick={() => setShowAllPlatforms(!showAllPlatforms)}
-              variant="outline"
-              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/80 rounded-xl px-6 py-3 font-semibold transition-all duration-300"
-            >
-              <motion.div
-                className="flex items-center gap-2"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
+        {/* 其他平台选项 - 移动端隐藏 */}
+        {(!isMounted || !detectedInfo.isMobile) && (
+          <motion.div
+            className="mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <div className="text-center mb-6">
+              <Button
+                onClick={() => setShowAllPlatforms(!showAllPlatforms)}
+                variant="outline"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/80 rounded-xl px-6 py-3 font-semibold transition-all duration-300"
               >
-                {showAllPlatforms ? (
-                  <>
-                    <ChevronUp className="w-4 h-4" />
-                    收起其他平台选项
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="w-4 h-4" />
-                    查看其他平台选项
-                  </>
-                )}
-              </motion.div>
-            </Button>
-
-            {!showAllPlatforms && (
-              <motion.p
-                className="text-sm text-gray-500 dark:text-gray-400 mt-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                支持 Windows、macOS 和 Linux 平台
-              </motion.p>
-            )}
-          </div>
-
-          <AnimatePresence>
-            {showAllPlatforms && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {/* 平台选择器 */}
-                <PlatformSelector
-                  platforms={platforms}
-                  activeTab={activeTab}
-                  detectedOS={detectedInfo.os}
-                  isMounted={isMounted}
-                  onTabChange={setActiveTab}
-                />
-
-                {/* 当前选中平台的下载内容 */}
-                <AnimatePresence mode="wait">
-                  {releaseData && (
-                    <DownloadCards
-                      releaseData={releaseData}
-                      platforms={platforms}
-                      activeTab={activeTab}
-                      detectedInfo={detectedInfo}
-                      isMounted={isMounted}
-                      onDownload={handleDownload}
-                    />
+                <motion.div
+                  className="flex items-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {showAllPlatforms ? (
+                    <>
+                      <ChevronUp className="w-4 h-4" />
+                      收起其他平台选项
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4" />
+                      查看其他平台选项
+                    </>
                   )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+                </motion.div>
+              </Button>
+
+              {!showAllPlatforms && (
+                <motion.p
+                  className="text-sm text-gray-500 dark:text-gray-400 mt-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  支持 Windows、macOS 和 Linux 平台
+                </motion.p>
+              )}
+            </div>
+
+            <AnimatePresence>
+              {showAllPlatforms && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {/* 平台选择器 */}
+                  <PlatformSelector
+                    platforms={platforms}
+                    activeTab={activeTab}
+                    detectedOS={detectedInfo.os}
+                    isMounted={isMounted}
+                    onTabChange={setActiveTab}
+                  />
+
+                  {/* 当前选中平台的下载内容 */}
+                  <AnimatePresence mode="wait">
+                    {releaseData && (
+                      <DownloadCards
+                        releaseData={releaseData}
+                        platforms={platforms}
+                        activeTab={activeTab}
+                        detectedInfo={detectedInfo}
+                        isMounted={isMounted}
+                        onDownload={handleDownload}
+                      />
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </div>
     </section>
   );
