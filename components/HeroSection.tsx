@@ -91,7 +91,7 @@ function MainContent({
           }`}
           onClick={() =>
             window.open(
-              "https://docs.echolab.vip",
+              "https://docs.echoplayer.cc",
               "_blank",
               "noopener,noreferrer"
             )
