@@ -168,9 +168,11 @@ export function DownloadCards({
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {channel.name.includes("Setup") || channel.name.includes("安装包") ? (
+                  {channel.name.includes("Setup") ||
+                  channel.name.includes("安装包") ? (
                     <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                  ) : channel.name.includes("Portable") || channel.name.includes("便携版") ? (
+                  ) : channel.name.includes("Portable") ||
+                    channel.name.includes("便携版") ? (
                     <FileArchive className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   ) : (
                     <GitBranch className="w-6 h-6 text-gray-700 dark:text-gray-300" />
@@ -253,7 +255,7 @@ export function DownloadCards({
                           }}
                         >
                           {/* 根据包类型显示不同图标 */}
-                          {variant.packageType === 'setup' ? (
+                          {variant.packageType === "setup" ? (
                             <Package
                               className={`w-7 h-7 ${
                                 isRecommended
@@ -261,7 +263,7 @@ export function DownloadCards({
                                   : "text-gray-600 dark:text-gray-300"
                               }`}
                             />
-                          ) : variant.packageType === 'portable' ? (
+                          ) : variant.packageType === "portable" ? (
                             <FileArchive
                               className={`w-7 h-7 ${
                                 isRecommended
@@ -310,13 +312,17 @@ export function DownloadCards({
 
                             {/* 包类型标识 */}
                             {variant.packageType && (
-                              <span className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
-                                variant.packageType === 'setup'
-                                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                  : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                              }`}>
+                              <span
+                                className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
+                                  variant.packageType === "setup"
+                                    ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                    : "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                                }`}
+                              >
                                 <span className="w-1 h-1 bg-current rounded-full"></span>
-                                {variant.packageType === 'setup' ? '安装包' : '便携版'}
+                                {variant.packageType === "setup"
+                                  ? "安装包"
+                                  : "便携版"}
                               </span>
                             )}
 
@@ -352,17 +358,17 @@ export function DownloadCards({
                           onClick={() =>
                             onDownload(
                               variant.url,
-                              `EchoLab-${releaseData.version}-${variant.arch}${currentPlatform.ext}`
+                              `EchoPlayer-${releaseData.version}-${variant.arch}${currentPlatform.ext}`
                             )
                           }
                           className={`${
                             isRecommended
-                              ? variant.packageType === 'setup'
+                              ? variant.packageType === "setup"
                                 ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
                                 : "bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
-                              : variant.packageType === 'portable'
-                              ? "bg-purple-700 hover:bg-purple-800 dark:bg-purple-600 dark:hover:bg-purple-700 text-white"
-                              : "bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-700 text-white"
+                              : variant.packageType === "portable"
+                                ? "bg-purple-700 hover:bg-purple-800 dark:bg-purple-600 dark:hover:bg-purple-700 text-white"
+                                : "bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-700 text-white"
                           } rounded-lg px-6 py-3 font-semibold transition-all duration-300 group border-0`}
                         >
                           <motion.div

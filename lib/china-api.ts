@@ -25,7 +25,7 @@ export async function getLatestReleaseFromChinaApi(): Promise<ProcessedRelease |
     const response = await fetch('http://release.echoplayer.z2blog.com/api/releases', {
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'EchoLab-Website',
+        'User-Agent': 'EchoPlayer-Website',
       },
       // 设置超时时间
       // Set timeout

@@ -11,7 +11,7 @@ export default function Footer() {
               <Play className="w-5 h-5 text-white fill-white transition-transform duration-300 group-hover:scale-110" />
             </div>
             <span className="text-2xl font-semibold text-gray-900 dark:text-white transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-              EchoLab
+              EchoPlayer
             </span>
           </div>
           <div className="text-center md:text-right">
@@ -19,7 +19,7 @@ export default function Footer() {
               专业的语言学习视频播放器
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-200">
-              © 2025 EchoLab. 开源项目，欢迎贡献代码
+              © 2025 EchoPlayer. 开源项目，欢迎贡献代码
             </p>
           </div>
         </div>

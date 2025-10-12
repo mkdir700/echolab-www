@@ -12,11 +12,11 @@ export async function getLatestReleaseFromGitHub(): Promise<ProcessedRelease | n
     // 先尝试获取最新的正式版本
     // First try to get the latest stable release
     let response = await fetch(
-      "https://api.github.com/repos/mkdir700/echolab/releases/latest",
+      "https://api.github.com/repos/mkdir700/EchoPlayer/releases/latest",
       {
         headers: {
           Accept: "application/vnd.github.v3+json",
-          "User-Agent": "EchoLab-Website",
+          "User-Agent": "EchoPlayer-Website",
         },
         // 添加缓存控制
         // Add cache control
@@ -34,11 +34,11 @@ export async function getLatestReleaseFromGitHub(): Promise<ProcessedRelease | n
         "No stable release found, trying to get the most recent release..."
       );
       response = await fetch(
-        "https://api.github.com/repos/mkdir700/echolab/releases?per_page=1",
+        "https://api.github.com/repos/mkdir700/EchoPlayer/releases?per_page=1",
         {
           headers: {
             Accept: "application/vnd.github.v3+json",
-            "User-Agent": "EchoLab-Website",
+            "User-Agent": "EchoPlayer-Website",
           },
           next: { revalidate: 300 },
         }

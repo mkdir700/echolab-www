@@ -18,7 +18,7 @@ export default function SupportSection() {
       desc: "提交 Bug 报告和功能建议",
       color: "gray",
       buttonText: "前往 GitHub",
-      link: "https://github.com/mkdir700/echolab/issues",
+      link: "https://github.com/mkdir700/EchoPlayer/issues",
     },
     {
       icon: MessageSquare,
@@ -26,7 +26,7 @@ export default function SupportSection() {
       desc: "加入用户交流和讨论",
       color: "blue",
       buttonText: "参与讨论",
-      link: "https://github.com/mkdir700/echolab/discussions",
+      link: "https://github.com/mkdir700/EchoPlayer/discussions",
     },
     {
       icon: Mail,
@@ -75,7 +75,7 @@ export default function SupportSection() {
                 <Button
                   variant="outline"
                   className="w-full rounded-xl border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 group/btn"
-                  onClick={() => window.open(support.link, '_blank')}
+                  onClick={() => window.open(support.link, "_blank")}
                 >
                   {support.buttonText}
                   <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-300 group-hover/btn:translate-x-1" />

@@ -561,7 +561,7 @@ export default function WhyVideoLearning() {
         <div className="text-center mt-12 md:mt-20">
           <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full text-sm font-medium mb-6 shadow-lg">
             <Sparkles className="w-4 h-4" />
-            <span>EchoLab 让这一切变得简单</span>
+            <span>EchoPlayer 让这一切变得简单</span>
           </div>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
             我们的软件专为视频语言学习而设计，提供逐句精听、变速播放、智能字幕等功能，
