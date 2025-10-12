@@ -17,7 +17,7 @@ export default function Header() {
   // Handle GitHub link click
   const handleGithubClick = () => {
     window.open(
-      "https://github.com/mkdir700/echolab",
+      "https://github.com/mkdir700/EchoPlayer",
       "_blank",
       "noopener,noreferrer"
     );
@@ -34,7 +34,7 @@ export default function Header() {
             <Play className="w-4 h-4 text-white fill-white transition-transform duration-300 group-hover:scale-110" />
           </div>
           <span className="text-xl font-semibold text-foreground transition-colors duration-300 group-hover:text-blue-600">
-            EchoLab
+            EchoPlayer
           </span>
         </div>
         <div className="flex items-center space-x-2">

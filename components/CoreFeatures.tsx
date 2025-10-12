@@ -18,7 +18,7 @@ export default function CoreFeatures() {
   return (
     <section
       id="features"
-      className="py-16 md:py-32 px-4 md:px-6 bg-white dark:bg-gray-900"
+      className="py-16 md:py-32 px-4 md:px-6 bg-gradient-to-b from-purple-50/30 via-background to-background dark:from-purple-950/20 dark:via-gray-900 dark:to-gray-900"
     >
       <div className="container mx-auto max-w-7xl">
         <div className="text-center mb-12 md:mb-20">

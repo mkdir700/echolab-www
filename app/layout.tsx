@@ -19,9 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EchoLab - Professional Language Learning Video Player",
+  title: "EchoPlayer - Professional Language Learning Video Player",
   description:
-    "Experience sentence-by-sentence listening with EchoLab's professional video player for language learning.",
+    "Experience sentence-by-sentence listening with EchoPlayer's professional video player for language learning.",
 };
 
 export default function RootLayout({

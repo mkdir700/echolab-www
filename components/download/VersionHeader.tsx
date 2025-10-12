@@ -74,7 +74,7 @@ export function VersionHeader({ releaseData }: VersionHeaderProps) {
           立即下载
         </span>
         <br />
-        <span className="text-foreground">EchoLab</span>
+        <span className="text-foreground">EchoPlayer</span>
       </motion.h2>
 
       {/* 副标题 */}

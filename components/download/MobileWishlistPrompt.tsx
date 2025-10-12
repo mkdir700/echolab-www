@@ -29,7 +29,7 @@ export function MobileWishlistPrompt({ isVisible }: MobileWishlistPromptProps) {
         </div>
         <div className="flex-1">
           <p className="text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
-            EchoLab 目前专注于桌面端体验，移动端版本正在规划中。
+            EchoPlayer 目前专注于桌面端体验，移动端版本正在规划中。
           </p>
         </div>
       </div>

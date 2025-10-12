@@ -111,7 +111,7 @@ export function RecommendedDownload({
           onClick={() =>
             onDownload(
               recommendedDownload.variant.url,
-              `EchoLab-${releaseData.version}-${recommendedDownload.variant.arch}${recommendedDownload.platform.ext}`
+              `EchoPlayer-${releaseData.version}-${recommendedDownload.variant.arch}${recommendedDownload.platform.ext}`
             )
           }
           className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl py-4 font-semibold text-lg transition-all duration-300 group shadow-lg shadow-blue-600/25"

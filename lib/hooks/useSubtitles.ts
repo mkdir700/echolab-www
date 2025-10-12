@@ -10,7 +10,7 @@ export const queryKeys = {
 
 // Mock data for development (can be removed when API is ready)
 const mockSubtitleData: SubtitleItem[] = [
-  { id: 1, start: 0, end: 3, en: "Welcome to EchoLab", zh: "欢迎使用 EchoLab" },
+  { id: 1, start: 0, end: 3, en: "Welcome to EchoPlayer", zh: "欢迎使用 EchoPlayer" },
   {
     id: 2,
     start: 3,

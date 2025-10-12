@@ -153,7 +153,7 @@ export default function DownloadSection() {
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 tracking-tight bg-gradient-to-r from-foreground via-blue-600 to-purple-600 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-              立即下载 EchoLab
+              立即下载 EchoPlayer
             </h2>
             <div className="inline-flex items-center gap-3 bg-card/90 dark:bg-card/90 backdrop-blur-xl text-blue-700 dark:text-blue-300 px-6 py-4 rounded-2xl border border-blue-200/50 dark:border-blue-700/50 mb-8 shadow-lg">
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -208,7 +208,7 @@ export default function DownloadSection() {
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-8 tracking-tight bg-gradient-to-r from-foreground via-blue-600 to-purple-600 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-              立即下载 EchoLab
+              立即下载 EchoPlayer
             </h2>
             <div className="inline-flex items-center gap-3 bg-card/90 dark:bg-card/90 backdrop-blur-xl text-orange-700 dark:text-orange-300 px-6 py-4 rounded-2xl border border-orange-200/50 dark:border-orange-700/50 mb-8 shadow-lg">
               <AlertCircle className="w-6 h-6" />
@@ -245,12 +245,12 @@ export default function DownloadSection() {
   return (
     <section
       id="download"
-      className="relative py-20 lg:py-32 px-6 overflow-hidden bg-gradient-to-br from-background via-background to-blue-50/30 dark:to-blue-950/30"
+      className="relative py-20 lg:py-32 px-6 overflow-hidden bg-background"
     >
       {/* 背景装饰 */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* 主要渐变背景 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-background to-purple-50/30 dark:from-blue-950/40 dark:to-purple-950/30"></div>
+        {/* 主要渐变背景 - 从白色/深色背景过渡 */}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 via-background to-background dark:from-blue-950/20 dark:via-background dark:to-background"></div>
 
         {/* 动态光晕效果 */}
         <div className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/8 via-purple-400/4 to-transparent rounded-full blur-3xl animate-pulse [animation-delay:1s]"></div>
